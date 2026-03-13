@@ -1,276 +1,276 @@
-# 二两记忆系统方案
+# erliang Memory System Scheme
 
-> 版本：v1.0
-> 状态：正式发布
-> 日期：2026-03-14
-
----
-
-## 一、为什么要做这套系统
-
-### 1.1 问题背景
-
-AI 助手在长时间运行中面临的核心挑战：
-- **记忆丢失**：模型刷新后丢失上下文
-- **检索失效**：embedding 服务崩溃导致无法搜索
-- **写入混乱**：新记忆不知道写在哪、如何标记状态
-- **质量参差**：历史文件存在乱码、空文件、低质量内容
-
-### 1.2 目标
-
-让二两（AI 助手）能够：
-1. **记住** - 重要信息不丢失
-2. **检索** - 需要时能找到
-3. **自愈** - 出问题能自动修复
-4. **进化** - 不断优化
+> Version: v1.0
+> Status: Official Release
+> Date: 2026-03-14
 
 ---
 
-## 二、系统分层与结构
+## 1. Why Build This System
 
-### 2.1 整体架构
+### 1.1 Problem Background
+
+Core challenges for AI assistant during long-term operation:
+- **Memory Loss**: Context lost after model refresh
+- **Retrieval Failure**: Cannot search when embedding service crashes
+- **Write Chaos**: Don't know where/how to mark new memories
+- **Quality Issues**: History files have encoding issues, empty files, low-quality content
+
+### 1.2 Goals
+
+Enable erliang (AI assistant) to:
+1. **Remember** - Important info not lost
+2. **Retrieve** - Find when needed
+3. **Self-heal** - Auto fix when issues occur
+4. **Evolve** - Continuously improve
+
+---
+
+## 2. System Architecture
+
+### 2.1 Overall Structure
 
 ```
-┌─────────────────────────────────────────┐
-│           醒来自检流程                    │
-│  (每次模型刷新后自动执行)                 │
-├─────────────────────────────────────────┤
-│           记忆存储层                     │
-├─────────────────────────────────────────┤
-│  短期记忆  │  长期记忆  │  学习笔记     │
-│  (daily)   │ (MEMORY)  │ (.learnings) │
-├─────────────────────────────────────────┤
-│           检索层                         │
-│     (embedding + LanceDB)              │
-├─────────────────────────────────────────┤
-│           监督层                         │
-│   (自动检查 + 结构化记录)                │
-└─────────────────────────────────────────┘
++=========================================+
+|         Wake-up Self-check             |
+|   (auto-run after model refresh)        |
++=========================================+
+|         Memory Storage Layer            |
++=========================================+
+|  Short-term  |  Long-term  |  Learn   |
+|   (daily)    |  (MEMORY)   | (.learn)|
++=========================================+
+|         Retrieval Layer                  |
+|     (embedding + LanceDB)              |
++=========================================+
+|         Monitoring Layer                 |
+|   (auto check + structured record)      |
++=========================================+
 ```
 
-### 2.2 核心文件
+### 2.2 Core Files
 
-| 文件 | 用途 |
-|------|------|
-| MEMORY.md | 长期记忆（身份、用户信息、重要事项） |
-| USER.md | 当前用户偏好和任务 |
-| memory/YYYY-MM-DD.md | 每日工作日志 |
-| .learnings/*.md | 学习笔记 |
-
----
-
-## 三、P0-P4 各自做什么
-
-### P0: 基础设施
-- embedding 服务部署
-- LanceDB 数据库初始化
-- 检索 API 配置
-
-### P1: 检索恢复
-- embedding 服务故障恢复
-- 索引重建
-- 检索验证
-
-### P2: 写入协议
-- 明确什么该写
-- 确定写入位置
-- 规范状态标记
-- 定义模板格式
-
-### P3: 监督机制
-- 定时检查 embedding 服务
-- 检查 Gateway 状态
-- 扫描空文件/异常文件
-- 检查结果结构化留痕
-
-### P4: 清洗与冻结
-- 正常文件整理
-- 历史损坏文件冻结
-- 回填策略
+| File | Purpose |
+|------|---------|
+| MEMORY.md | Long-term memory (identity, user info, important matters) |
+| USER.md | Current user preferences and tasks |
+| memory/YYYY-MM-DD.md | Daily work log |
+| .learnings/*.md | Learning notes |
 
 ---
 
-## 四、这次实际修复内容
+## 3. P0-P4 Definitions
 
-### 4.1 P1 修复
-- embedding 服务恢复（端口 11440）
-- 检索功能验证通过
-- 索引补齐到 39/39
+### P0: Infrastructure
+- Embedding service deployment
+- LanceDB database initialization
+- Retrieval API configuration
 
-### 4.2 P2 实施
-- 定义写入类型：identity/preference/daily/learning/temp
-- 确定写入位置和状态标记
-- 创建最小模板
+### P1: Retrieval Recovery
+- Embedding service fault recovery
+- Index rebuild
+- Retrieval verification
 
-### 4.3 P3 建立
-- 固定检查输出格式（JSON）
-- 每次检查自动留痕
+### P2: Write Protocol
+- Define what to write
+- Determine write location
+- Standardize status markers
+- Define template format
 
-### 4.4 P4 处理
-- 扫描并冻结 22 个历史损坏文件
-- 确认正常文件无需清洗
+### P3: Monitoring Mechanism
+- Scheduled embedding service check
+- Gateway status check
+- Empty/anomaly file scan
+- Structured check records
 
----
-
-## 五、当前状态
-
-### 5.1 完成状态
-
-| 项目 | 状态 |
-|------|------|
-| P0 基础设施 | ✅ 已部署 |
-| P1 检索恢复 | ✅ 已完成并稳定 |
-| P2-A 写入协议定义 | ✅ 已完成 |
-| P2-B 写入协议验证 | ⏳ 观察验证期 |
-| P3 监督机制 | ✅ 稳定运行 |
-| P4-A 历史冻结 | ⚠️ 已冻结（22个文件） |
-| P4-B 正常文件 | ✅ 无需清洗 |
-
-### 5.2 系统状态
-
-- Embedding 服务：运行中（端口 11440）
-- Gateway：运行中（端口 18789）
-- 检索：正常
-- 索引：39/39
+### P4: Cleanup & Freeze
+- Normal file organization
+- Historical damaged file freeze
+- Backfill strategy
 
 ---
 
-## 六、可复用部分
+## 4. What Was Fixed This Time
 
-### 6.1 启动必读规则
+### 4.1 P1 Fix
+- Embedding service recovery (port 11440)
+- Retrieval verified working
+- Index rebuilt to 39/39
 
-每次模型刷新后执行：
-1. 读 MEMORY.md → 确认自己是谁
-2. 读 USER.md → 确认任务
-3. 读 memory/今天.md → 确认今天干啥
-4. 扫描 .learnings/ → 加载最近3个文件
-5. 检查 embedding 服务状态
+### 4.2 P2 Implementation
+- Defined write types: identity/preference/daily/learning/temp
+- Determined write locations and status markers
+- Created minimum templates
 
-### 6.2 检索配置规则
+### 4.3 P3 Establishment
+- Fixed check output format (JSON)
+- Auto record for each check
 
-- embedding 服务端口：11440
-- 模型：all-MiniLM-L6-v2
-- 验证命令：`netstat -ano | findstr "11440"`
+### 4.4 P4 Processing
+- Scanned and froze 22 historical damaged files
+- Confirmed normal files don't need cleanup
 
-### 6.3 写入协议模板
+---
+
+## 5. Current Status
+
+### 5.1 Completion Status
+
+| Item | Status |
+|------|--------|
+| P0 Infrastructure | Done |
+| P1 Retrieval Recovery | Done, Stable |
+| P2-A Write Protocol Definition | Done |
+| P2-B Write Protocol Verification | In Progress |
+| P3 Monitoring Mechanism | Stable |
+| P4-A Historical Freeze | Frozen (22 files) |
+| P4-B Normal Files | No cleanup needed |
+
+### 5.2 System Status
+
+- Embedding service: Running (port 11440)
+- Gateway: Running (port 18789)
+- Retrieval: Normal
+- Index: 39/39
+
+---
+
+## 6. Reusable Parts
+
+### 6.1 Startup Checklist
+
+Run after each model refresh:
+1. Read MEMORY.md - Confirm who I am
+2. Read USER.md - Confirm task
+3. Read memory/today.md - Confirm today's work
+4. Scan .learnings/ - Load recent 3 files
+5. Check embedding service status
+
+### 6.2 Retrieval Config Rules
+
+- Embedding service port: 11440
+- Model: all-MiniLM-L6-v2
+- Verify command: `netstat -ano | findstr "11440"`
+
+### 6.3 Write Protocol Template
 
 ```markdown
-# 记忆条目
+# Memory Entry
 
-> 时间：2026-03-14
-> 类型：[identity/preference/daily/learning/temp]
-> 状态：[draft/confirmed/archived]
+> Time: 2026-03-14
+> Type: [identity/preference/daily/learning/temp]
+> Status: [draft/confirmed/archived]
 
-## 核心内容
+## Core Content
 - ...
 
-## 来源
+## Source
 - ...
 
-## 下次需要
+## Next Need
 - ...
 ```
 
-### 6.4 监督机制格式
+### 6.4 Monitoring Format
 
 ```json
 {
   "timestamp": "2026-03-14T04:10:00Z",
   "checks": [
-    {"item": "embedding_service", "status": "ok", "detail": "端口 11440 正常"},
-    {"item": "gateway", "status": "ok", "detail": "端口 18789 正常"},
-    {"item": "empty_files", "status": "ok", "detail": "无空文件"}
+    {"item": "embedding_service", "status": "ok", "detail": "Port 11440 normal"},
+    {"item": "gateway", "status": "ok", "detail": "Port 18789 normal"},
+    {"item": "empty_files", "status": "ok", "detail": "No empty files"}
   ],
   "anomalies": [],
   "actions": []
 }
 ```
 
-### 6.5 清洗/冻结边界
+### 6.5 Cleanup/Freeze Boundaries
 
-| 类型 | 边界 | 处理方式 |
-|------|------|---------|
-| 空文件 | < 50 bytes | 检查是否有效 |
-| 小文件 | < 200 bytes | 检查内容价值 |
-| 乱码文件 | 文件名/内容乱码 | 冻结，不自动修复 |
-| 低质量 | 重复 > 80% | 评估后处理 |
+| Type | Boundary | Handling |
+|------|----------|----------|
+| Empty file | < 50 bytes | Check if valid |
+| Small file | < 200 bytes | Check content value |
+| Corrupted file | Filename/content corrupted | Freeze, no auto-fix |
+| Low quality | Duplicate > 80% | Evaluate then process |
 
-### 6.6 embedding 服务部署
+### 6.6 Embedding Service Deployment
 
-**启动命令：**
+**Start command:**
 ```bash
 python embedding_server.py
 ```
 
-**验证：**
+**Verify:**
 ```bash
 netstat -ano | findstr "11440"
 ```
 
-**重启：**
+**Restart:**
 ```bash
-# 先 kill 旧进程
+# Kill old process first
 taskkill /PID <PID> /F
-# 再启动
+# Then start
 python embedding_server.py
 ```
 
 ---
 
-## 七、阶段验收标准
+## 7. Acceptance Criteria
 
-### P1 验收
-- [ ] embedding 服务运行中
-- [ ] 检索功能正常
-- [ ] 索引完整
+### P1 Acceptance
+- [ ] Embedding service running
+- [ ] Retrieval working
+- [ ] Index complete
 
-### P2 验收
-- [ ] 写入类型已定义
-- [ ] 位置规范已确定
-- [ ] 状态标记已统一
-- [ ] 模板已创建
+### P2 Acceptance
+- [ ] Write types defined
+- [ ] Location standards determined
+- [ ] Status markers unified
+- [ ] Templates created
 
-### P3 验收
-- [ ] 检查格式已固定
-- [ ] 自动留痕已实现
-- [ ] 定时检查已运行
+### P3 Acceptance
+- [ ] Check format fixed
+- [ ] Auto record implemented
+- [ ] Scheduled checks running
 
-### P4 验收
-- [ ] 问题文件已冻结
-- [ ] 正常文件已确认
-- [ ] 边界已定义
-
----
-
-## 八、常见故障与排查
-
-### 8.1 embedding 服务无法启动
-
-**症状：** 端口 11440 未监听
-
-**排查：**
-1. 检查 Python 进程：`Get-Process python`
-2. 查看错误日志
-3. 重新启动服务
-
-### 8.2 检索返回空结果
-
-**症状：** 搜索无结果
-
-**排查：**
-1. 检查 embedding 服务状态
-2. 验证索引是否完整
-3. 检查 LanceDB 数据
-
-### 8.3 文件乱码
-
-**症状：** 文件名/内容显示乱码
-
-**原因：** 写入时编码问题
-
-**处理：** 冻结处理，不自动修复
+### P4 Acceptance
+- [ ] Problem files frozen
+- [ ] Normal files confirmed
+- [ ] Boundaries defined
 
 ---
 
-**文档维护：memory/ 目录**
-**版本管理：Git**
+## 8. Troubleshooting
+
+### 8.1 Embedding Service Won't Start
+
+**Symptom:** Port 11440 not listening
+
+**Debug:**
+1. Check Python process: `Get-Process python`
+2. Check error logs
+3. Restart service
+
+### 8.2 Retrieval Returns Empty
+
+**Symptom:** Search returns no results
+
+**Debug:**
+1. Verify service status
+2. Verify index integrity
+3. Check LanceDB data
+
+### 8.3 File Encoding Issues
+
+**Symptom:** Filename/content shows garbled characters
+
+**Cause:** Encoding issue during write
+
+**Handling:** Freeze processing, no auto-fix
+
+---
+
+**Document Location: memory/ directory**
+**Version Control: Git**

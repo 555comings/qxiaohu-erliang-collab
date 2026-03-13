@@ -1,43 +1,43 @@
-# P3 监督机制文档
+# P3 Monitoring Mechanism
 
-> 版本：v1.0
-> 状态：已完成
-> 日期：2026-03-14
-
----
-
-## 1. 监督机制目标
-
-定时检查记忆系统各组件状态，确保：
-- embedding 服务正常运行
-- Gateway 正常工作
-- 文件无异常
-- 检查结果自动留痕
+> Version: v1.0
+> Status: Completed
+> Date: 2026-03-14
 
 ---
 
-## 2. 检查项目清单
+## 1. Mechanism Goals
 
-| 检查项 | 验证方法 | 频率 |
-|--------|---------|------|
-| embedding 服务 | `netstat -ano \| findstr "11440"` | 每次检查 |
-| Gateway | `openclaw gateway status` | 每次检查 |
-| 空文件扫描 | 检查 < 50 bytes 文件 | 每天 |
-| 乱码文件 | 检查文件名/内容异常 | 每天 |
+Regular checks on memory system components:
+- Embedding service running normally
+- Gateway working normally
+- No file anomalies
+- Check results auto-recorded
 
 ---
 
-## 3. 检查输出格式
+## 2. Check Items
 
-每次检查输出固定 JSON 格式：
+| Check Item | Verify Method | Frequency |
+|------------|--------------|-----------|
+| Embedding service | `netstat -ano \| findstr "11440"` | Every check |
+| Gateway | `openclaw gateway status` | Every check |
+| Empty file scan | Check < 50 bytes files | Daily |
+| Corrupted files | Check filename/content anomalies | Daily |
+
+---
+
+## 3. Check Output Format
+
+Fixed JSON format for each check:
 
 ```json
 {
   "timestamp": "2026-03-14T04:10:00Z",
   "checks": [
-    {"item": "embedding_service", "status": "ok", "detail": "端口 11440 LISTENING"},
-    {"item": "gateway", "status": "ok", "detail": "127.0.0.1:18789 正常"},
-    {"item": "empty_files", "status": "ok", "detail": "无空文件"}
+    {"item": "embedding_service", "status": "ok", "detail": "Port 11440 LISTENING"},
+    {"item": "gateway", "status": "ok", "detail": "127.0.0.1:18789 normal"},
+    {"item": "empty_files", "status": "ok", "detail": "No empty files"}
   ],
   "anomalies": [],
   "actions": []
@@ -46,31 +46,31 @@
 
 ---
 
-## 4. 状态值说明
+## 4. Status Values
 
-| 状态 | 含义 |
-|------|------|
-| ok | 正常 |
-| warning | 警告 |
-| error | 错误 |
-| skipped | 跳过 |
-
----
-
-## 5. 自动留痕规则
-
-- 每次检查结果记录到 `memory/2026-03-14.md`
-- 异常情况记录到 `anomalies` 数组
-- 采取的动作记录到 `actions` 数组
+| Status | Meaning |
+|--------|---------|
+| ok | Normal |
+| warning | Warning |
+| error | Error |
+| skipped | Skipped |
 
 ---
 
-## 6. 验收标准
+## 5. Auto-Record Rules
 
-- [x] 检查格式已固定为 JSON
-- [x] 每次检查自动留痕
-- [x] 定时检查已运行
+- Each check result recorded to `memory/2026-03-14.md`
+- Anomalies recorded to `anomalies` array
+- Actions taken recorded to `actions` array
 
 ---
 
-**维护：memory/MEMORY_SYSTEM_OVERVIEW.md**
+## 6. Acceptance Criteria
+
+- [x] Check format fixed to JSON
+- [x] Auto record for each check
+- [x] Scheduled checks running
+
+---
+
+**Maintained in: memory/MEMORY_SYSTEM_OVERVIEW.md**

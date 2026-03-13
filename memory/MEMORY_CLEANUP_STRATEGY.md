@@ -1,84 +1,84 @@
-# P4 清洗与冻结策略文档
+# P4 Cleanup and Freeze Strategy
 
-> 版本：v1.0
-> 状态：已完成
-> 日期：2026-03-14
-
----
-
-## 1. 策略目标
-
-处理历史文件中的问题：
-- 空文件
-- 乱码文件
-- 低质量内容
+> Version: v1.0
+> Status: Completed
+> Date: 2026-03-14
 
 ---
 
-## 2. 边界定义
+## 1. Strategy Goals
 
-| 类型 | 边界 | 处理方式 |
-|------|------|---------|
-| 空文件 | < 50 bytes | 检查是否有效 |
-| 小文件 | < 200 bytes | 检查内容价值 |
-| 乱码文件 | 文件名/内容乱码 | 冻结，不自动修复 |
-| 低质量 | 重复内容 > 80% | 评估后处理 |
+Handle issues in historical files:
+- Empty files
+- Corrupted files
+- Low-quality content
 
 ---
 
-## 3. 分级标准
+## 2. Boundary Definitions
 
-### A类（可处理）
-- 内容正常
-- 无引用
-- 低风险
-- 可后续改名
-
-### B类（需审查）
-- 内容正常
-- 可能被引用
-- 需先查引用
-
-### C类（冻结）
-- 内容损坏
-- 文件名/内容乱码
-- 不自动修复
+| Type | Boundary | Handling |
+|------|----------|----------|
+| Empty file | < 50 bytes | Check if valid |
+| Small file | < 200 bytes | Check content value |
+| Corrupted file | Filename/content corrupted | Freeze, no auto-fix |
+| Low quality | Duplicate > 80% | Evaluate then process |
 
 ---
 
-## 4. 冻结区记录
+## 3. Classification Standards
 
-### P4-A: 历史损坏文件冻结区
+### Class A (Processable)
+- Content normal
+- No references
+- Low risk
+- Can rename later
 
-**状态：** 已冻结
+### Class B (Needs Review)
+- Content normal
+- May have references
+- Need to check references first
 
-**冻结文件：** 22个
-- memory/ 目录：14个
-- .learnings/ 目录：8个
-
-**冻结规则：**
-- ❌ 不自动修复
-- ❌ 不批量重命名
-- ❌ 不批量转码
-- ❌ 不做内容覆盖
-- ✅ 仅保留清单和状态
-
----
-
-## 5. P4-B: 正常文件
-
-**状态：** 无需清洗
-
-**结论：** 正常文件内容良好，格式规范，无需为清洗而清洗
+### Class C (Frozen)
+- Content corrupted
+- Filename/content garbled
+- No auto-fix
 
 ---
 
-## 6. 验收标准
+## 4. Freeze Zone Record
 
-- [x] 问题文件已冻结
-- [x] 正常文件已确认
-- [x] 边界已定义
+### P4-A: Historical Damaged Files Freeze Zone
+
+**Status:** Frozen
+
+**Frozen files:** 22
+- memory/ directory: 14
+- .learnings/ directory: 8
+
+**Freeze rules:**
+- No auto-fix
+- No batch rename
+- No batch encoding conversion
+- No content overwrite
+- Only keep list and status
 
 ---
 
-**维护：memory/MEMORY_SYSTEM_OVERVIEW.md**
+## 5. P4-B: Normal Files
+
+**Status:** No cleanup needed
+
+**Conclusion:** Normal files have good content and standard format, no need to cleanup just for cleanup
+
+---
+
+## 6. Acceptance Criteria
+
+- [x] Problem files frozen
+- [x] Normal files confirmed
+- [x] Boundaries defined
+
+---
+
+**Maintained in: memory/MEMORY_SYSTEM_OVERVIEW.md**

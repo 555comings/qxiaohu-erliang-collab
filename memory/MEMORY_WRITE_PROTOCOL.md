@@ -1,88 +1,88 @@
-# P2 写入协议
+# P2 Write Protocol
 
-> 版本：v1.0
-> 状态：已完成
-> 日期：2026-03-14
-
----
-
-## 1. 协议目标
-
-规范记忆写入行为，解决：
-- 不知道什么该写
-- 不知道写在哪
-- 不知道如何标记状态
+> Version: v1.0
+> Status: Completed
+> Date: 2026-03-14
 
 ---
 
-## 2. 写入类型定义
+## 1. Protocol Goals
 
-| 类型 | 写入位置 | 状态标记 | 示例 |
-|------|---------|---------|------|
-| 身份/长期记忆 | MEMORY.md | [confirmed] | 猫爸生日、8周年纪念日 |
-| 用户偏好 | USER.md | [confirmed] | 对话风格、emoji偏好 |
-| 每日工作日志 | memory/YYYY-MM-DD.md | [draft→confirmed] | 完成任务、待办事项 |
-| 学习笔记 | .learnings/*.md | [draft] | 新技能、新知识 |
-| 临时/待确认 | memory/temp.md | [draft] | 需要确认的信息 |
+Standardize memory writing behavior, solve:
+- Don't know what to write
+- Don't know where to write
+- Don't know how to mark status
 
 ---
 
-## 3. 状态标记说明
+## 2. Write Type Definitions
 
-| 状态 | 含义 | 使用场景 |
-|------|------|---------|
-| [draft] | 草稿/待确认 | 新写入的内容，等待确认 |
-| [confirmed] | 已确认 | 经确认的可靠信息 |
-| [archived] | 已归档 | 过时但需保留的信息 |
+| Type | Write Location | Status Marker | Example |
+|------|---------------|---------------|---------|
+| Identity/Long-term | MEMORY.md | [confirmed] | User birthday, anniversary |
+| User Preference | USER.md | [confirmed] | Chat style, emoji preference |
+| Daily Work Log | memory/YYYY-MM-DD.md | [draft->confirmed] | Completed tasks, todos |
+| Learning Notes | .learnings/*.md | [draft] | New skills, knowledge |
+| Temp/Pending | memory/temp.md | [draft] | Info needing confirmation |
 
 ---
 
-## 4. 最小模板
+## 3. Status Markers
+
+| Status | Meaning | Use Case |
+|--------|---------|----------|
+| [draft] | Draft/Pending confirmation | Newly written content, awaiting confirmation |
+| [confirmed] | Confirmed | Verified reliable information |
+| [archived] | Archived | Outdated but need to keep |
+
+---
+
+## 4. Minimum Template
 
 ```markdown
-# 记忆条目
+# Memory Entry
 
-> 时间：2026-03-14
-> 类型：[identity/preference/daily/learning/temp]
-> 状态：[draft/confirmed/archived]
+> Time: 2026-03-14
+> Type: [identity/preference/daily/learning/temp]
+> Status: [draft/confirmed/archived]
 
-## 核心内容
+## Core Content
 - ...
 
-## 来源
+## Source
 - ...
 
-## 下次需要
+## Next Need
 - ...
 ```
 
 ---
 
-## 5. 写入检查清单
+## 5. Write Checklist
 
-每次写入前检查：
-- [ ] 这值得记吗？（不是流水账）
-- [ ] 放在正确位置了吗？
-- [ ] 标记状态了吗？
-- [ ] 下次能检索到吗？
-
----
-
-## 6. 落地文件
-
-- MEMORY.md - 已添加状态标记
-- memory/user_memory.md - 已添加状态标记
+Before each write, check:
+- [ ] Is this worth recording? (not流水账)
+- [ ] Is it in the correct location?
+- [ ] Is status marked?
+- [ ] Can it be retrieved next time?
 
 ---
 
-## 7. 待验证项（P2-B）
+## 6. Implemented Files
 
-观察新记忆写入是否符合协议：
-- [ ] 是否使用了正确的类型
-- [ ] 是否放在了正确的位置
-- [ ] 是否标记了状态
-- [ ] 是否使用了模板格式
+- MEMORY.md - Added status markers
+- memory/user_memory.md - Added status markers
 
 ---
 
-**维护：memory/MEMORY_SYSTEM_OVERVIEW.md**
+## 7. Pending Verification (P2-B)
+
+Observe if new memory writes follow the protocol:
+- [ ] Using correct types
+- [ ] Using correct locations
+- [ ] Marking status
+- [ ] Using template format
+
+---
+
+**Maintained in: memory/MEMORY_SYSTEM_OVERVIEW.md**

@@ -1,62 +1,62 @@
-# Embedding 服务部署与恢复文档
+# Embedding Service Deployment and Recovery
 
-> 版本：v1.0
-> 状态：已完成
-> 日期：2026-03-14
-
----
-
-## 1. 服务概述
-
-- **服务名**：embedding-server
-- **端口**：11440
-- **模型**：all-MiniLM-L6-v2
-- **功能**：文本向量化，用于记忆检索
+> Version: v1.0
+> Status: Completed
+> Date: 2026-03-14
 
 ---
 
-## 2. 启动方法
+## 1. Service Overview
 
-### 2.1 启动命令
+- **Service name**: embedding-server
+- **Port**: 11440
+- **Model**: all-MiniLM-L6-v2
+- **Function**: Text vectorization for memory retrieval
+
+---
+
+## 2. Startup Method
+
+### 2.1 Start Command
 
 ```bash
 python embedding_server.py
 ```
 
-或使用批处理文件：
+Or use batch file:
 
 ```bash
 start_embedding.bat
 ```
 
-### 2.2 验证服务运行
+### 2.2 Verify Service Running
 
 ```bash
 netstat -ano | findstr "11440"
 ```
 
-**预期输出：**
+**Expected output:**
 ```
 TCP    0.0.0.0:11440          0.0.0.0:0              LISTENING       <PID>
 ```
 
 ---
 
-## 3. 重启方法
+## 3. Restart Method
 
-### 3.1 找到进程 PID
+### 3.1 Find Process PID
 
 ```bash
 netstat -ano | findstr "11440"
 ```
 
-### 3.2 结束进程
+### 3.2 Kill Process
 
 ```bash
 taskkill /PID <PID> /F
 ```
 
-### 3.3 重新启动
+### 3.3 Restart
 
 ```bash
 python embedding_server.py
@@ -64,41 +64,59 @@ python embedding_server.py
 
 ---
 
-## 4. 故障排查
+## 4. Troubleshooting
 
-### 4.1 端口被占用
+### 4.1 Port Already in Use
 
-**症状：** 启动失败，端口已被占用
+**Symptom:** Startup failed, port already in use
 
-**解决：**
-1. 找到占用端口的进程：`netstat -ano | findstr "11440"`
-2. 结束该进程或使用其他端口
+**Solution:**
+1. Find process using port: `netstat -ano | findstr "11440"`
+2. Kill that process or use different port
 
-### 4.2 模型下载失败
+### 4.2 Model Download Failed
 
-**症状：** 首次启动报错
+**Symptom:** First run error
 
-**解决：**
-1. 检查网络连接
-2. 使用国内镜像源
-3. 手动下载模型
+**Solution:**
+1. Check network connection
+2. Use domestic mirror
+3. Download model manually
 
-### 4.3 检索无结果
+### 4.3 Retrieval Returns Empty
 
-**排查步骤：**
-1. 确认服务运行：`netstat -ano | findstr "11440"`
-2. 测试 API：`curl http://localhost:11440/health`
-3. 检查 LanceDB 数据
-
----
-
-## 5. 相关文件
-
-- `embedding_server.py` - 服务主程序
-- `start_embedding.bat` - 启动批处理
-- `embedding_service_README.md` - 原始说明文档
-- `requirements.txt` - Python 依赖
+**Debug steps:**
+1. Verify service running: `netstat -ano | findstr "11440"`
+2. Test API: `curl http://localhost:11440/health`
+3. Check LanceDB data
 
 ---
 
-**维护：memory/MEMORY_SYSTEM_OVERVIEW.md**
+## 5. Configuration
+
+### 5.1 Port Configuration
+
+In `embedding_server.py`:
+
+```python
+app.run(host='0.0.0.0', port=11440)
+```
+
+### 5.2 Model Configuration
+
+```python
+model = SentenceTransformer('all-MiniLM-L6-v2')
+```
+
+---
+
+## 6. Related Files
+
+- `embedding_server.py` - Service main program
+- `start_embedding.bat` - Startup batch file
+- `embedding_service_README.md` - Original documentation
+- `requirements.txt` - Python dependencies
+
+---
+
+**Maintained in: memory/MEMORY_SYSTEM_OVERVIEW.md**
