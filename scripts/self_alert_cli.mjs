@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { ROUTES, evaluateCandidate } from './self_alert_evaluator.mjs';
 import { loadState, saveState } from './self_alert_state.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
+import { pollAlertSources } from './self_alert_poll.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
 
 async function readJson(jsonPath) {
@@ -27,7 +28,8 @@ function usage() {
     '  node scripts/self_alert_cli.mjs detect-user <event.json|->',
     '  node scripts/self_alert_cli.mjs detect-tool <event.json|->',
     '  node scripts/self_alert_cli.mjs process-user <event.json|-> [statePath] [workspaceRoot]',
-    '  node scripts/self_alert_cli.mjs process-tool <event.json|-> [statePath] [workspaceRoot]'
+    '  node scripts/self_alert_cli.mjs process-tool <event.json|-> [statePath] [workspaceRoot]',
+    '  node scripts/self_alert_cli.mjs poll [statePath] [workspaceRoot] [inputsRoot]'
   ].join('\n'));
 }
 
@@ -91,6 +93,16 @@ async function main() {
       ? detectUserCandidates(event)
       : detectToolCandidates(event);
     const output = await processCandidates(candidates, statePath, workspaceRoot);
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    return;
+  }
+
+  if (command === 'poll') {
+    const output = await pollAlertSources({
+      statePath: inputPath || path.join(process.cwd(), 'memory', 'self_alert_state.json'),
+      workspaceRoot: statePathArg || process.cwd(),
+      inputsRoot: workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs')
+    });
     process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
     return;
   }

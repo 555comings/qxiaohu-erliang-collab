@@ -81,7 +81,10 @@ export function createEmptyState(now = new Date()) {
   return {
     version: 1,
     updatedAt: now.toISOString(),
-    records: []
+    records: [],
+    meta: {
+      cursors: {}
+    }
   };
 }
 
@@ -229,6 +232,14 @@ export function evaluateCandidate(candidateInput, stateInput, configInput = {}, 
     state.records = [];
   }
 
+  if (!state.meta || typeof state.meta !== 'object') {
+    state.meta = { cursors: {} };
+  }
+
+  if (!state.meta.cursors || typeof state.meta.cursors !== 'object') {
+    state.meta.cursors = {};
+  }
+
   pruneExpiredRecords(state, now, config);
 
   let record = state.records.find((entry) => stateRecordMatches(entry, candidate));
@@ -306,6 +317,10 @@ export function assertStateShape(state) {
 
   if (!Array.isArray(state.records)) {
     throw new Error('state.records must be an array');
+  }
+
+  if (state.meta != null && typeof state.meta !== 'object') {
+    throw new Error('state.meta must be an object when present');
   }
 
   for (const record of state.records) {

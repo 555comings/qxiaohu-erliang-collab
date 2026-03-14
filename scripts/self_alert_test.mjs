@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -12,6 +12,7 @@ import {
   evaluateCandidate
 } from './self_alert_evaluator.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
+import { pollAlertSources } from './self_alert_poll.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
 
 test('buildDedupKey uses signal, topic, signature, and day bucket', () => {
@@ -189,6 +190,39 @@ test('writeEvaluationResult writes redacted markdown to daily file', async () =>
     assert.match(content, /## \[self-alert\] 2026-03-14 /);
     assert.match(content, /apiKey=\*\*\*/);
     assert.doesNotMatch(content, /sk-user-1234567890abcdef/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('pollAlertSources consumes only new NDJSON events', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-poll-'));
+  const runtimeRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const userPath = path.join(runtimeRoot, 'user.ndjson');
+  const toolPath = path.join(runtimeRoot, 'tool.ndjson');
+
+  try {
+    await rm(runtimeRoot, { recursive: true, force: true });
+    await mkdir(runtimeRoot, { recursive: true });
+    await writeFile(userPath, '{"text":"记一下这个规则","topicScope":"chat"}\n', 'utf8');
+    await writeFile(toolPath, '{"toolName":"exec","topicScope":"git-fix","command":"git reset --hard HEAD~1","exitCode":128,"stderr":"fatal: unsafe repository"}\n', 'utf8');
+
+    const first = await pollAlertSources({
+      workspaceRoot: tempRoot,
+      statePath: path.join(tempRoot, 'memory', 'self_alert_state.json'),
+      inputsRoot: runtimeRoot
+    });
+
+    const second = await pollAlertSources({
+      workspaceRoot: tempRoot,
+      statePath: path.join(tempRoot, 'memory', 'self_alert_state.json'),
+      inputsRoot: runtimeRoot
+    });
+
+    assert.equal(first.consumed.user, 1);
+    assert.equal(first.consumed.tool, 1);
+    assert.equal(second.consumed.user, 0);
+    assert.equal(second.consumed.tool, 0);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
