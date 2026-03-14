@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-14T09:30:00+08:00",
+  "records": [
+    {
+      "signal_type": "user_correction",
+      "topic_scope": "identity-role",
+      "error_signature": "qxiaohu-role-mixup",
+      "day_bucket": "2026-03-14",
+      "last_time": "2026-03-14T09:10:00+08:00",
+      "count": 1,
+      "status": "recorded"
+    }
+  ]
+}
