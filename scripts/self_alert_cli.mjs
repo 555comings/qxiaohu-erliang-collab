@@ -8,17 +8,21 @@ import { detectToolCandidates, detectUserCandidates } from './self_alert_detecto
 import { pollAlertSources } from './self_alert_poll.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
 
+function stripBom(value) {
+  return String(value || '').replace(/^\uFEFF/, '');
+}
+
 async function readJson(jsonPath) {
   if (!jsonPath || jsonPath === '-') {
     const chunks = [];
     for await (const chunk of process.stdin) {
       chunks.push(chunk);
     }
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return JSON.parse(stripBom(Buffer.concat(chunks).toString('utf8')));
   }
 
   const raw = await readFile(jsonPath, 'utf8');
-  return JSON.parse(raw);
+  return JSON.parse(stripBom(raw));
 }
 
 function usage() {

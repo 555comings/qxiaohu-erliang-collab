@@ -16,9 +16,13 @@ function ensureCursorState(state) {
   }
 }
 
+function stripBom(value) {
+  return String(value || '').replace(/^\uFEFF/, '');
+}
+
 async function readNewJsonLines(filePath, cursor) {
   try {
-    const raw = await readFile(filePath, 'utf8');
+    const raw = stripBom(await readFile(filePath, 'utf8'));
     const startOffset = Number(cursor || 0) > raw.length ? 0 : Number(cursor || 0);
     const nextCursor = raw.length;
     const slice = raw.slice(startOffset);

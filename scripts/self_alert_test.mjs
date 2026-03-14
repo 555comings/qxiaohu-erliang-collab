@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { Buffer } from 'node:buffer';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -13,6 +14,7 @@ import {
 } from './self_alert_evaluator.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
 import { pollAlertSources } from './self_alert_poll.mjs';
+import { loadState } from './self_alert_state.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
 
 test('buildDedupKey uses signal, topic, signature, and day bucket', () => {
@@ -196,6 +198,25 @@ test('writeEvaluationResult writes redacted markdown to daily file', async () =>
     assert.match(content, /## \[self-alert\] 2026-03-14 /);
     assert.match(content, /apiKey=\*\*\*/);
     assert.doesNotMatch(content, /sk-user-1234567890abcdef/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('loadState accepts UTF-8 BOM JSON files', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-bom-'));
+  const statePath = path.join(tempRoot, 'self_alert_state.json');
+
+  try {
+    const bomJson = Buffer.concat([
+      Buffer.from([0xef, 0xbb, 0xbf]),
+      Buffer.from('{"version":1,"updatedAt":"2026-03-15T01:55:00+08:00","records":[],"meta":{"cursors":{}}}', 'utf8')
+    ]);
+    await writeFile(statePath, bomJson);
+
+    const state = await loadState(statePath);
+    assert.equal(state.version, 1);
+    assert.deepEqual(state.records, []);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
