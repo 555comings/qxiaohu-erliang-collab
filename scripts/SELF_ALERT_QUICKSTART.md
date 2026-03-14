@@ -78,8 +78,10 @@ That means the sidecar no longer depends only on manual `process-user` or `proce
 
 Heartbeat behavior is:
 
-- run one `poll` tick
-- if nothing new is consumed and nothing is written, stay quiet with `HEARTBEAT_OK`
+- run one `health-check`
+- if health issues are found, surface a short alert
+- then run one `poll` tick
+- if nothing new is consumed, nothing is written, and health is clean, stay quiet with `HEARTBEAT_OK`
 - if records are written or poll fails, surface a short alert
 
 ## If You Get Stuck

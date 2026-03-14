@@ -13,6 +13,7 @@ import {
   evaluateCandidate
 } from './self_alert_evaluator.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
+import { collectHealthCandidates } from './self_alert_health.mjs';
 import { pollAlertSources } from './self_alert_poll.mjs';
 import { loadState } from './self_alert_state.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
@@ -264,6 +265,57 @@ test('writeEvaluationResult inserts self alert records before later daily sectio
 
     assert.ok(selfAlertIndex > content.indexOf('## [memory] 2026-03-14 08:00'));
     assert.ok(selfAlertIndex < content.indexOf('## Legacy Notes'));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('collectHealthCandidates flags unreadable state without overwriting it', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-health-state-'));
+  const statePath = path.join(tempRoot, 'memory', 'self_alert_state.json');
+
+  try {
+    await mkdir(path.dirname(statePath), { recursive: true });
+    await writeFile(statePath, '{not valid json', 'utf8');
+
+    const health = await collectHealthCandidates({
+      statePath,
+      workspaceRoot: tempRoot,
+      inputsRoot: path.join(tempRoot, 'runtime', 'self_alert_inputs')
+    });
+
+    assert.equal(health.ok, false);
+    assert.equal(health.persistState, false);
+    assert.equal(health.candidates.length, 1);
+    assert.equal(health.candidates[0].signalType, 'memory_health');
+    assert.match(health.candidates[0].evidence, /statePath=/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('collectHealthCandidates flags malformed NDJSON input lines', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-health-ndjson-'));
+  const inputsRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const statePath = path.join(tempRoot, 'memory', 'self_alert_state.json');
+
+  try {
+    await mkdir(inputsRoot, { recursive: true });
+    await mkdir(path.dirname(statePath), { recursive: true });
+    await writeFile(path.join(inputsRoot, 'user.ndjson'), '{"text":"ok"}\nnot-json\n', 'utf8');
+    await writeFile(statePath, JSON.stringify(createEmptyState(new Date('2026-03-15T00:00:00Z'))), 'utf8');
+
+    const health = await collectHealthCandidates({
+      statePath,
+      workspaceRoot: tempRoot,
+      inputsRoot
+    });
+
+    assert.equal(health.ok, false);
+    assert.equal(health.persistState, true);
+    assert.equal(health.candidates.length, 1);
+    assert.match(health.candidates[0].summary, /NDJSON input has an unreadable line/);
+    assert.match(health.candidates[0].evidence, /line=2/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

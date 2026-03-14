@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { ROUTES, evaluateCandidate } from './self_alert_evaluator.mjs';
 import { loadState, saveState } from './self_alert_state.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
+import { collectHealthCandidates } from './self_alert_health.mjs';
 import { pollAlertSources } from './self_alert_poll.mjs';
 import { writeEvaluationResult } from './self_alert_writer.mjs';
 
@@ -33,12 +34,13 @@ function usage() {
     '  node scripts/self_alert_cli.mjs detect-tool <event.json|->',
     '  node scripts/self_alert_cli.mjs process-user <event.json|-> [statePath] [workspaceRoot]',
     '  node scripts/self_alert_cli.mjs process-tool <event.json|-> [statePath] [workspaceRoot]',
-    '  node scripts/self_alert_cli.mjs poll [statePath] [workspaceRoot] [inputsRoot]'
+    '  node scripts/self_alert_cli.mjs poll [statePath] [workspaceRoot] [inputsRoot]',
+    '  node scripts/self_alert_cli.mjs health-check [statePath] [workspaceRoot] [inputsRoot]'
   ].join('\n'));
 }
 
-async function processCandidates(candidates, statePath, workspaceRoot) {
-  let state = await loadState(statePath);
+async function processCandidates(candidates, statePath, workspaceRoot, options = {}) {
+  let state = options.initialState || await loadState(statePath);
   const results = [];
 
   for (const candidate of candidates) {
@@ -48,13 +50,17 @@ async function processCandidates(candidates, statePath, workspaceRoot) {
     results.push({ ...result, writeResult });
   }
 
-  await saveState(statePath, state);
+  if (options.persistState !== false) {
+    await saveState(statePath, state);
+  }
+
   return {
     count: results.length,
     wrote: results.filter((entry) => entry.writeResult?.wrote).length,
     routes: results.map((entry) => entry.route).filter((route) => route !== ROUTES.NONE),
     results,
-    state
+    state,
+    persistedState: options.persistState !== false
   };
 }
 
@@ -108,6 +114,19 @@ async function main() {
       inputsRoot: workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs')
     });
     process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    return;
+  }
+
+  if (command === 'health-check') {
+    const statePath = inputPath || path.join(process.cwd(), 'memory', 'self_alert_state.json');
+    const workspaceRoot = statePathArg || process.cwd();
+    const inputsRoot = workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs');
+    const health = await collectHealthCandidates({ statePath, workspaceRoot, inputsRoot });
+    const output = await processCandidates(health.candidates, statePath, workspaceRoot, {
+      initialState: health.state,
+      persistState: health.persistState
+    });
+    process.stdout.write(`${JSON.stringify({ ...health, ...output }, null, 2)}\n`);
     return;
   }
 

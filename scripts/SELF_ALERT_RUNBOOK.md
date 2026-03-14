@@ -79,9 +79,10 @@ node -e "import('./scripts/self_alert_poll.mjs').then(async ({ pollAlertSources 
 In this workspace, the main-session heartbeat is the current automation hook.
 The root `HEARTBEAT.md` instructs the agent to:
 
+- run one `health-check` before polling;
 - run one `poll` tick against the sidecar inputs;
-- stay quiet when nothing new is consumed and nothing is written;
-- surface a short alert if records are written or if polling fails.
+- stay quiet when health is clean, nothing new is consumed, and nothing is written;
+- surface a short alert if health issues are found, records are written, or polling fails.
 
 This keeps the sidecar lightweight and avoids inventing a second scheduler before it is needed.
 
