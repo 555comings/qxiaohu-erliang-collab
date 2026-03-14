@@ -1,5 +1,7 @@
 # Self Alert Runbook
 
+Read `SELF_ALERT_QUICKSTART.md` first if you are returning to this project after a break.
+
 ## Scope
 
 This runbook covers the current sidecar-based P1 implementation.
@@ -26,13 +28,16 @@ Implemented:
 - route separation from severity;
 - redacted markdown writes;
 - atomic write using `.tmp` then rename;
-- incremental poller over NDJSON input files, including cursor reset after file truncation/rotation.
+- incremental poller over NDJSON input files, including cursor reset after file truncation/rotation;
+- daily-memory-v2-compatible self-alert writes for daily routes;
+- workspace heartbeat trigger via `HEARTBEAT.md` for periodic poll ticks.
 
 Not yet implemented:
 
 - direct OpenClaw real-time integration;
 - webhook-style event subscription;
-- heartbeat-based health sweep.
+- heartbeat-based health sweep beyond the current poll tick;
+- cron-based or daemon-style isolated execution.
 
 ## Input Files
 
@@ -68,6 +73,17 @@ Poll incremental NDJSON inputs:
 ```powershell
 node -e "import('./scripts/self_alert_poll.mjs').then(async ({ pollAlertSources }) => { const out = await pollAlertSources({ workspaceRoot: process.cwd() }); console.log(JSON.stringify(out, null, 2)); })"
 ```
+
+## Heartbeat Trigger
+
+In this workspace, the main-session heartbeat is the current automation hook.
+The root `HEARTBEAT.md` instructs the agent to:
+
+- run one `poll` tick against the sidecar inputs;
+- stay quiet when nothing new is consumed and nothing is written;
+- surface a short alert if records are written or if polling fails.
+
+This keeps the sidecar lightweight and avoids inventing a second scheduler before it is needed.
 
 ## Review Focus For 二两
 
