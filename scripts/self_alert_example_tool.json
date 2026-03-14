@@ -1,0 +1,7 @@
+{
+  "toolName": "exec",
+  "topicScope": "git-fix",
+  "command": "git reset --hard HEAD~1",
+  "exitCode": 128,
+  "stderr": "fatal: unsafe repository"
+}
