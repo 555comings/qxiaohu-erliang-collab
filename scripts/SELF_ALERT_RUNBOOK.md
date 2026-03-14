@@ -74,15 +74,21 @@ Poll incremental NDJSON inputs:
 node -e "import('./scripts/self_alert_poll.mjs').then(async ({ pollAlertSources }) => { const out = await pollAlertSources({ workspaceRoot: process.cwd() }); console.log(JSON.stringify(out, null, 2)); })"
 ```
 
+Run the full safe automation cycle:
+
+```powershell
+node scripts/self_alert_cli.mjs tick memory/self_alert_state.json . runtime/self_alert_inputs
+```
+
 ## Heartbeat Trigger
 
 In this workspace, the main-session heartbeat is the current automation hook.
 The root `HEARTBEAT.md` instructs the agent to:
 
-- run one `health-check` before polling;
-- run one `poll` tick against the sidecar inputs;
+- run one `tick` cycle through `self_alert_cli.mjs`;
+- let `tick` perform `health-check` first and skip `poll` when polling would be unsafe;
 - stay quiet when health is clean, nothing new is consumed, and nothing is written;
-- surface a short alert if health issues are found, records are written, or polling fails.
+- surface a short alert if health issues are found, records are written, or the cycle fails.
 
 This keeps the sidecar lightweight and avoids inventing a second scheduler before it is needed.
 

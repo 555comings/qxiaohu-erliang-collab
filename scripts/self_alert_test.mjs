@@ -13,6 +13,7 @@ import {
   evaluateCandidate
 } from './self_alert_evaluator.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
+import { runSelfAlertTick } from './self_alert_cycle.mjs';
 import { collectHealthCandidates } from './self_alert_health.mjs';
 import { pollAlertSources } from './self_alert_poll.mjs';
 import { loadState } from './self_alert_state.mjs';
@@ -335,6 +336,53 @@ test('loadState accepts UTF-8 BOM JSON files', async () => {
     const state = await loadState(statePath);
     assert.equal(state.version, 1);
     assert.deepEqual(state.records, []);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('runSelfAlertTick skips poll when health-check finds malformed input', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-tick-skip-'));
+  const inputsRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const statePath = path.join(tempRoot, 'memory', 'self_alert_state.json');
+
+  try {
+    await mkdir(inputsRoot, { recursive: true });
+    await mkdir(path.dirname(statePath), { recursive: true });
+    await writeFile(path.join(inputsRoot, 'user.ndjson'), 'not-json\n', 'utf8');
+    await writeFile(statePath, JSON.stringify(createEmptyState(new Date('2026-03-15T00:00:00Z'))), 'utf8');
+
+    const tick = await runSelfAlertTick({ workspaceRoot: tempRoot, statePath, inputsRoot });
+
+    assert.equal(tick.skippedPoll, true);
+    assert.equal(tick.health.count, 1);
+    assert.equal(tick.poll, null);
+    assert.equal(tick.summary.healthIssues, 1);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('runSelfAlertTick runs health-check and poll in one cycle', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-tick-run-'));
+  const inputsRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const statePath = path.join(tempRoot, 'memory', 'self_alert_state.json');
+
+  try {
+    await mkdir(inputsRoot, { recursive: true });
+    await mkdir(path.dirname(statePath), { recursive: true });
+    await writeFile(path.join(inputsRoot, 'user.ndjson'), '{"text":"记一下这条 heartbeat 规则","topicScope":"heartbeat"}\n', 'utf8');
+    await writeFile(path.join(inputsRoot, 'tool.ndjson'), '', 'utf8');
+    await writeFile(statePath, JSON.stringify(createEmptyState(new Date('2026-03-15T00:00:00Z'))), 'utf8');
+
+    const tick = await runSelfAlertTick({ workspaceRoot: tempRoot, statePath, inputsRoot });
+    const daily = await readFile(path.join(tempRoot, 'memory', '2026-03-15.md'), 'utf8');
+
+    assert.equal(tick.skippedPoll, false);
+    assert.equal(tick.health.count, 0);
+    assert.equal(tick.poll.consumed.user, 1);
+    assert.equal(tick.summary.wrote, 1);
+    assert.match(daily, /## \[self-alert\] 2026-03-15 /);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

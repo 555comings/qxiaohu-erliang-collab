@@ -2,12 +2,11 @@ import path from 'node:path';
 import process from 'node:process';
 import { readFile } from 'node:fs/promises';
 
-import { ROUTES, evaluateCandidate } from './self_alert_evaluator.mjs';
+import { evaluateCandidate } from './self_alert_evaluator.mjs';
 import { loadState, saveState } from './self_alert_state.mjs';
 import { detectToolCandidates, detectUserCandidates } from './self_alert_detectors.mjs';
-import { collectHealthCandidates } from './self_alert_health.mjs';
 import { pollAlertSources } from './self_alert_poll.mjs';
-import { writeEvaluationResult } from './self_alert_writer.mjs';
+import { runHealthCheck, runSelfAlertTick, processCandidates } from './self_alert_cycle.mjs';
 
 function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
@@ -35,33 +34,9 @@ function usage() {
     '  node scripts/self_alert_cli.mjs process-user <event.json|-> [statePath] [workspaceRoot]',
     '  node scripts/self_alert_cli.mjs process-tool <event.json|-> [statePath] [workspaceRoot]',
     '  node scripts/self_alert_cli.mjs poll [statePath] [workspaceRoot] [inputsRoot]',
-    '  node scripts/self_alert_cli.mjs health-check [statePath] [workspaceRoot] [inputsRoot]'
+    '  node scripts/self_alert_cli.mjs health-check [statePath] [workspaceRoot] [inputsRoot]',
+    '  node scripts/self_alert_cli.mjs tick [statePath] [workspaceRoot] [inputsRoot]'
   ].join('\n'));
-}
-
-async function processCandidates(candidates, statePath, workspaceRoot, options = {}) {
-  let state = options.initialState || await loadState(statePath);
-  const results = [];
-
-  for (const candidate of candidates) {
-    const result = evaluateCandidate(candidate, state);
-    state = result.state;
-    const writeResult = await writeEvaluationResult(result, workspaceRoot);
-    results.push({ ...result, writeResult });
-  }
-
-  if (options.persistState !== false) {
-    await saveState(statePath, state);
-  }
-
-  return {
-    count: results.length,
-    wrote: results.filter((entry) => entry.writeResult?.wrote).length,
-    routes: results.map((entry) => entry.route).filter((route) => route !== ROUTES.NONE),
-    results,
-    state,
-    persistedState: options.persistState !== false
-  };
 }
 
 async function main() {
@@ -118,15 +93,22 @@ async function main() {
   }
 
   if (command === 'health-check') {
-    const statePath = inputPath || path.join(process.cwd(), 'memory', 'self_alert_state.json');
-    const workspaceRoot = statePathArg || process.cwd();
-    const inputsRoot = workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs');
-    const health = await collectHealthCandidates({ statePath, workspaceRoot, inputsRoot });
-    const output = await processCandidates(health.candidates, statePath, workspaceRoot, {
-      initialState: health.state,
-      persistState: health.persistState
+    const output = await runHealthCheck({
+      statePath: inputPath || path.join(process.cwd(), 'memory', 'self_alert_state.json'),
+      workspaceRoot: statePathArg || process.cwd(),
+      inputsRoot: workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs')
     });
-    process.stdout.write(`${JSON.stringify({ ...health, ...output }, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    return;
+  }
+
+  if (command === 'tick') {
+    const output = await runSelfAlertTick({
+      statePath: inputPath || path.join(process.cwd(), 'memory', 'self_alert_state.json'),
+      workspaceRoot: statePathArg || process.cwd(),
+      inputsRoot: workspaceRootArg || path.join(process.cwd(), 'runtime', 'self_alert_inputs')
+    });
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
     return;
   }
 

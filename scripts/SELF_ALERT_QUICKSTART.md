@@ -47,6 +47,8 @@ The right question is:
 5. Run one real processing command, for example:
    - `node scripts/self_alert_cli.mjs process-user scripts/self_alert_example_user.json memory/self_alert_state.json .`
    - or `node scripts/self_alert_cli.mjs process-tool scripts/self_alert_example_tool.json memory/self_alert_state.json .`
+6. When you want the full automation cycle manually, run:
+   - `node scripts/self_alert_cli.mjs tick memory/self_alert_state.json . runtime/self_alert_inputs`
 
 ## What Counts As Working
 
@@ -78,11 +80,12 @@ That means the sidecar no longer depends only on manual `process-user` or `proce
 
 Heartbeat behavior is:
 
-- run one `health-check`
-- if health issues are found, surface a short alert
-- then run one `poll` tick
+- run one `tick` cycle
+- `tick` does `health-check` first
+- if health issues are found, `tick` skips `poll` and surfaces a short alert
+- if health is clean, `tick` runs one `poll` tick
 - if nothing new is consumed, nothing is written, and health is clean, stay quiet with `HEARTBEAT_OK`
-- if records are written or poll fails, surface a short alert
+- if records are written or the cycle fails, surface a short alert
 
 ## If You Get Stuck
 
