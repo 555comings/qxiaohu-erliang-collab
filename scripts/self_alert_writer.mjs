@@ -47,7 +47,48 @@ export function resolveRoutePath(route, workspaceRoot, timestamp = new Date()) {
   }
 }
 
-export function buildMarkdownRecord(result) {
+function resolveDailyTrigger(candidate) {
+  if (candidate.signalType === 'remember_request') {
+    return 'remember-request';
+  }
+
+  if (candidate.signalType === 'task_state_change') {
+    return candidate.metadata?.taskState || 'progress';
+  }
+
+  if (candidate.signalType === 'exec_error' ||
+      candidate.signalType === 'write_failure' ||
+      candidate.signalType === 'memory_health' ||
+      candidate.signalType === 'systemic_failure') {
+    return 'blocked';
+  }
+
+  return 'lesson';
+}
+
+function resolveDailyStatus(result) {
+  return result.level === 'COUNT' ? 'draft' : 'verified';
+}
+
+function buildDailyRecord(result) {
+  const timestamp = formatLocalTimestamp(result.candidate.timestamp || result.state.updatedAt || new Date());
+  const candidate = result.candidate;
+  const summary = candidate.summary || 'Self alert recorded an event worth keeping in daily memory.';
+  const evidence = redactSensitiveText(candidate.evidence || 'n/a');
+  const lines = [
+    `## [self-alert] ${timestamp}`,
+    `- Trigger: ${resolveDailyTrigger(candidate)}`,
+    `- Scope: ${candidate.topicScope}`,
+    `- Status: ${resolveDailyStatus(result)}`,
+    `- Entry: Self alert recorded a ${candidate.signalType} event. ${summary}`,
+    `- Evidence: signal=${candidate.signalType}; level=${result.level}; reason=${result.reason}; raw=${evidence}`,
+    '- Next: Review for promotion only if the same pattern becomes stable across time; otherwise keep it at the daily layer.'
+  ];
+
+  return `${lines.join(os.EOL)}${os.EOL}${os.EOL}`;
+}
+
+function buildMarkdownRecord(result) {
   const timestamp = formatLocalTimestamp(result.candidate.timestamp || result.state.updatedAt || new Date());
   const candidate = result.candidate;
   const promoteTarget = result.route === ROUTES.MEMORY ? 'MEMORY.md' : 'none';
@@ -67,13 +108,63 @@ export function buildMarkdownRecord(result) {
   return `${lines.join(os.EOL)}${os.EOL}${os.EOL}`;
 }
 
+function buildDailySkeleton(filePath) {
+  const dateText = path.basename(filePath, path.extname(filePath));
+  return [
+    `# ${dateText}`,
+    '',
+    '## Meta',
+    '- Timezone: Asia/Shanghai',
+    '- Owner: self-alert',
+    '- Format: daily-memory-v2',
+    '',
+    '## Focus',
+    '- Active: self-alert generated records',
+    '- Open Loops: none',
+    '',
+    '## Entries',
+    '',
+    '## End State',
+    '- Promote: none',
+    '- Carry Forward: none',
+    ''
+  ].join(os.EOL);
+}
+
+function insertDailyRecord(existing, recordText) {
+  const lines = existing.split(/\r?\n/);
+  const entriesIndex = lines.findIndex((line) => line.trim() === '## Entries');
+
+  if (entriesIndex === -1) {
+    return `${existing}${existing.endsWith(os.EOL) ? '' : os.EOL}${recordText}`;
+  }
+
+  let insertIndex = lines.length;
+  for (let index = entriesIndex + 1; index < lines.length; index += 1) {
+    const trimmed = lines[index].trim();
+    if (/^##\s+\[/.test(trimmed)) {
+      continue;
+    }
+
+    if (/^##\s+/.test(trimmed)) {
+      insertIndex = index;
+      break;
+    }
+  }
+
+  const before = lines.slice(0, insertIndex).join(os.EOL);
+  const after = lines.slice(insertIndex).join(os.EOL);
+  const needsSeparator = before && !before.endsWith(os.EOL + os.EOL) ? os.EOL : '';
+  return `${before}${needsSeparator}${recordText}${after}`;
+}
+
 async function atomicWrite(filePath, content) {
   const tempPath = `${filePath}.tmp`;
   await writeFile(tempPath, content, 'utf8');
   await rename(tempPath, filePath);
 }
 
-export async function appendMarkdownRecord(filePath, recordText) {
+export async function appendMarkdownRecord(filePath, recordText, options = {}) {
   await mkdir(path.dirname(filePath), { recursive: true });
 
   let existing = '';
@@ -85,8 +176,15 @@ export async function appendMarkdownRecord(filePath, recordText) {
     }
   }
 
-  const prefix = existing && !existing.endsWith(os.EOL + os.EOL) ? `${os.EOL}` : '';
-  const content = `${existing}${prefix}${recordText}`;
+  let content = '';
+  if (options.dailyV2) {
+    const base = existing || buildDailySkeleton(filePath);
+    content = insertDailyRecord(base, recordText);
+  } else {
+    const prefix = existing && !existing.endsWith(os.EOL + os.EOL) ? `${os.EOL}` : '';
+    content = `${existing}${prefix}${recordText}`;
+  }
+
   await atomicWrite(filePath, content);
 }
 
@@ -96,7 +194,8 @@ export async function writeEvaluationResult(result, workspaceRoot) {
   }
 
   const filePath = resolveRoutePath(result.route, workspaceRoot, result.candidate.timestamp || new Date());
-  const recordText = buildMarkdownRecord(result);
-  await appendMarkdownRecord(filePath, recordText);
+  const isDailyRoute = result.route === ROUTES.DAILY;
+  const recordText = isDailyRoute ? buildDailyRecord(result) : buildMarkdownRecord(result);
+  await appendMarkdownRecord(filePath, recordText, { dailyV2: isDailyRoute });
   return { wrote: true, route: result.route, path: filePath };
 }

@@ -174,7 +174,7 @@ test('expected failure is ignored', () => {
   assert.equal(result.shouldWrite, false);
 });
 
-test('writeEvaluationResult writes redacted markdown to daily file', async () => {
+test('writeEvaluationResult writes daily-memory-v2 compatible self alert records', async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-'));
 
   try {
@@ -195,9 +195,75 @@ test('writeEvaluationResult writes redacted markdown to daily file', async () =>
     const content = await readFile(writeResult.path, 'utf8');
 
     assert.equal(writeResult.wrote, true);
+    assert.match(content, /# 2026-03-14/);
+    assert.match(content, /## Entries/);
     assert.match(content, /## \[self-alert\] 2026-03-14 /);
+    assert.match(content, /- Trigger: remember-request/);
+    assert.match(content, /- Status: verified/);
     assert.match(content, /apiKey=\*\*\*/);
     assert.doesNotMatch(content, /sk-user-1234567890abcdef/);
+    assert.match(content, /## End State/);
+    assert.ok(content.indexOf('## [self-alert]') < content.indexOf('## End State'));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('writeEvaluationResult inserts self alert records before later daily sections', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-existing-'));
+  const dailyPath = path.join(tempRoot, 'memory', '2026-03-14.md');
+
+  try {
+    await mkdir(path.dirname(dailyPath), { recursive: true });
+    await writeFile(dailyPath, [
+      '# 2026-03-14',
+      '',
+      '## Meta',
+      '- Timezone: Asia/Shanghai',
+      '- Owner: Q小虎',
+      '- Format: daily-memory-v2',
+      '',
+      '## Focus',
+      '- Active: existing focus',
+      '- Open Loops: none',
+      '',
+      '## Entries',
+      '## [memory] 2026-03-14 08:00',
+      '- Trigger: progress',
+      '- Scope: existing',
+      '- Status: verified',
+      '- Entry: Existing entry.',
+      '- Evidence: existing evidence',
+      '- Next: none',
+      '',
+      '## Legacy Notes',
+      '- legacy',
+      '',
+      '## End State',
+      '- Promote: none',
+      '- Carry Forward: none',
+      ''
+    ].join('\n'), 'utf8');
+
+    const result = evaluateCandidate(
+      {
+        signalType: 'remember_request',
+        topicScope: 'relay-style',
+        errorSignature: 'remember-request',
+        evidence: 'remember this too',
+        summary: 'User explicitly asked to remember something else.'
+      },
+      createEmptyState(new Date('2026-03-14T09:00:00Z')),
+      {},
+      new Date('2026-03-14T09:00:00Z')
+    );
+
+    await writeEvaluationResult(result, tempRoot);
+    const content = await readFile(dailyPath, 'utf8');
+    const selfAlertIndex = content.indexOf('## [self-alert] 2026-03-14 ');
+
+    assert.ok(selfAlertIndex > content.indexOf('## [memory] 2026-03-14 08:00'));
+    assert.ok(selfAlertIndex < content.indexOf('## Legacy Notes'));
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
