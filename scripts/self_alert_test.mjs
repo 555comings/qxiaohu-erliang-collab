@@ -255,6 +255,48 @@ test('pollAlertSources consumes only new NDJSON events', async () => {
   }
 });
 
+test('pollAlertSources treats cursors as line counts instead of byte offsets', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-poll-lines-'));
+  const runtimeRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const statePath = path.join(tempRoot, 'memory', 'self_alert_state.json');
+  const userPath = path.join(runtimeRoot, 'user.ndjson');
+  const toolPath = path.join(runtimeRoot, 'tool.ndjson');
+
+  try {
+    await mkdir(path.join(tempRoot, 'memory'), { recursive: true });
+    await mkdir(runtimeRoot, { recursive: true });
+    await writeFile(
+      userPath,
+      '{"text":"第一条普通消息","topicScope":"chat"}\n{"text":"记一下第二条规则","topicScope":"chat"}\n',
+      'utf8'
+    );
+    await writeFile(toolPath, '', 'utf8');
+    await writeFile(
+      statePath,
+      JSON.stringify({
+        version: 1,
+        updatedAt: '2026-03-15T00:00:00.000Z',
+        records: [],
+        meta: { cursors: { user: 1, tool: 0 } }
+      }, null, 2),
+      'utf8'
+    );
+
+    const result = await pollAlertSources({
+      workspaceRoot: tempRoot,
+      statePath,
+      inputsRoot: runtimeRoot
+    });
+
+    assert.equal(result.consumed.user, 1);
+    assert.equal(result.results.length, 1);
+    assert.equal(result.results[0].candidate.evidence, '记一下第二条规则');
+    assert.equal(result.state.meta.cursors.user, 2);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('pollAlertSources resets cursor when input file is truncated', async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-poll-truncate-'));
   const runtimeRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
