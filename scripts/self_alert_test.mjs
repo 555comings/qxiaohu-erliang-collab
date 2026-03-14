@@ -32,6 +32,12 @@ test('detectUserCandidates captures remember requests', () => {
   assert.equal(candidates[0].signalType, 'remember_request');
 });
 
+test('detectUserCandidates prefers specific correction over generic remember request', () => {
+  const candidates = detectUserCandidates({ text: '记一下：以后转发给二两时不要代码块。', topicScope: 'chat' });
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0].signalType, 'preference_correction');
+});
+
 test('detectUserCandidates ignores casual phrase 其实还好', () => {
   const candidates = detectUserCandidates({ text: '其实还好，不用记。', topicScope: 'chat' });
   assert.equal(candidates.length, 0);
@@ -223,6 +229,39 @@ test('pollAlertSources consumes only new NDJSON events', async () => {
     assert.equal(first.consumed.tool, 1);
     assert.equal(second.consumed.user, 0);
     assert.equal(second.consumed.tool, 0);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('pollAlertSources resets cursor when input file is truncated', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'self-alert-poll-truncate-'));
+  const runtimeRoot = path.join(tempRoot, 'runtime', 'self_alert_inputs');
+  const userPath = path.join(runtimeRoot, 'user.ndjson');
+  const toolPath = path.join(runtimeRoot, 'tool.ndjson');
+
+  try {
+    await mkdir(runtimeRoot, { recursive: true });
+    await writeFile(userPath, '{"text":"记一下这是一个更长的规则描述","topicScope":"chat"}\n', 'utf8');
+    await writeFile(toolPath, '', 'utf8');
+
+    const first = await pollAlertSources({
+      workspaceRoot: tempRoot,
+      statePath: path.join(tempRoot, 'memory', 'self_alert_state.json'),
+      inputsRoot: runtimeRoot
+    });
+
+    await writeFile(userPath, '{"text":"记一下短规则","topicScope":"chat"}\n', 'utf8');
+
+    const second = await pollAlertSources({
+      workspaceRoot: tempRoot,
+      statePath: path.join(tempRoot, 'memory', 'self_alert_state.json'),
+      inputsRoot: runtimeRoot
+    });
+
+    assert.equal(first.consumed.user, 1);
+    assert.equal(second.consumed.user, 1);
+    assert.equal(second.results[0].candidate.evidence, '记一下短规则');
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

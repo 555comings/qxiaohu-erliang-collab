@@ -20,13 +20,13 @@ Instead, it provides a runnable evaluator, detectors, writer, state file, and an
 
 Implemented:
 
-- user remember/correction/preference detection;
+- user remember/correction/preference detection with preference/correction priority over generic remember requests;
 - tool result detection for exec errors, write failures, high-risk git;
 - dedup state and four-level grading;
 - route separation from severity;
 - redacted markdown writes;
 - atomic write using `.tmp` then rename;
-- incremental poller over NDJSON input files.
+- incremental poller over NDJSON input files, including cursor reset after file truncation/rotation.
 
 Not yet implemented:
 

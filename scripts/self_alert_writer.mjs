@@ -16,7 +16,10 @@ function formatLocalTimestamp(input) {
 
 function dayFileName(input) {
   const date = input instanceof Date ? input : new Date(input);
-  return `${date.toISOString().slice(0, 10)}.md`;
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}.md`;
 }
 
 export function redactSensitiveText(value) {

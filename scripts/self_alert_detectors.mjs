@@ -74,7 +74,15 @@ export function detectUserCandidates(input) {
     ));
   }
 
-  return dedupeCandidates(candidates);
+  const deduped = dedupeCandidates(candidates);
+  const hasSpecificCorrection = deduped.some((candidate) =>
+    candidate.signalType === 'user_correction' || candidate.signalType === 'preference_correction');
+
+  if (!hasSpecificCorrection) {
+    return deduped;
+  }
+
+  return deduped.filter((candidate) => candidate.signalType !== 'remember_request');
 }
 
 function detectHighRiskGit(command, evidence, topicScope) {
