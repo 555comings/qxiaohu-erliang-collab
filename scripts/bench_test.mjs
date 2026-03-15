@@ -132,6 +132,36 @@ test('memory_bench smoke run writes summary artifacts', async () => {
   }
 });
 
+test('e2e_heartbeat_bench smoke run writes summary artifacts', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'heartbeat-e2e-bench-test-'));
+  const outDir = path.join(tempRoot, 'out');
+  const workspaceDir = path.join(tempRoot, 'workspaces');
+
+  try {
+    const run = await runNode([
+      'scripts/e2e_heartbeat_bench.mjs',
+      '--scenario', 'heartbeat-idle',
+      '--mode', 'warm',
+      '--runs', '1',
+      '--warmup', '0',
+      '--out', outDir,
+      '--workspace', workspaceDir,
+      '--tag', 'heartbeat-test',
+      '--commit', 'test-commit'
+    ], REPO_ROOT);
+
+    const parsed = JSON.parse(run.stdout);
+    const summary = JSON.parse(await readFile(path.join(parsed.outputDir, 'summary.json'), 'utf8'));
+    const report = await readFile(path.join(parsed.outputDir, 'report.md'), 'utf8');
+
+    assert.equal(summary.bench, 'heartbeat-e2e');
+    assert.equal(summary.scenarioSummaries['heartbeat-idle@warm'].okRuns, 1);
+    assert.match(report, /heartbeat-idle/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('bench_report combines summary outputs', async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'bench-report-test-'));
   const inputDir = path.join(tempRoot, 'input');
