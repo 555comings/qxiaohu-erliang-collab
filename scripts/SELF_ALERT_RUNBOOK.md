@@ -92,6 +92,38 @@ The root `HEARTBEAT.md` instructs the agent to:
 
 This keeps the sidecar lightweight and avoids inventing a second scheduler before it is needed.
 
+## Benchmarking
+
+The first benchmark cut now lives beside the sidecar scripts.
+It focuses on repeatable `self_alert` performance runs before adding broader memory and heartbeat suites.
+
+Run a smoke benchmark:
+
+```powershell
+node --expose-gc scripts/self_alert_bench.mjs --scenario smoke --mode both --runs 5 --warmup 1
+```
+
+Run the full current scenario set:
+
+```powershell
+node --expose-gc scripts/self_alert_bench.mjs --scenario all --mode both --runs 10 --warmup 2
+```
+
+Combine one or more benchmark output folders into a single report:
+
+```powershell
+node scripts/bench_report.mjs benchmarks/<run-a> benchmarks/<run-b> --out benchmarks/combined
+```
+
+Each benchmark run writes:
+
+- `benchmark-config.json`
+- `raw-results.jsonl`
+- `summary.json`
+- `report.md`
+
+These artifacts are the required evidence for future performance comparisons across Q小虎 and 二两 on different machines.
+
 ## Review Focus For 二两
 
 When reviewing P1, focus on:
