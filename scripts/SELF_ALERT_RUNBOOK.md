@@ -95,18 +95,30 @@ This keeps the sidecar lightweight and avoids inventing a second scheduler befor
 ## Benchmarking
 
 The first benchmark cut now lives beside the sidecar scripts.
-It focuses on repeatable `self_alert` performance runs before adding broader memory and heartbeat suites.
+It covers repeatable `self_alert` runs plus a first pass on the file-backed memory workflow before adding heartbeat end-to-end timing.
 
-Run a smoke benchmark:
+Run a smoke benchmark for the self-alert sidecar:
 
 ```powershell
 node --expose-gc scripts/self_alert_bench.mjs --scenario smoke --mode both --runs 5 --warmup 1
 ```
 
-Run the full current scenario set:
+Run the full current self-alert scenario set:
 
 ```powershell
 node --expose-gc scripts/self_alert_bench.mjs --scenario all --mode both --runs 10 --warmup 2
+```
+
+Run a smoke benchmark for the file-backed memory workflow:
+
+```powershell
+node --expose-gc scripts/memory_bench.mjs --scenario smoke --mode both --runs 5 --warmup 1
+```
+
+Run the full current memory scenario set:
+
+```powershell
+node --expose-gc scripts/memory_bench.mjs --scenario all --mode both --runs 10 --warmup 2
 ```
 
 Combine one or more benchmark output folders into a single report:
