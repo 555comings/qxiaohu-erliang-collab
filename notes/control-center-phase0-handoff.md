@@ -54,3 +54,9 @@
 优先级：先做1和4，再做2和3。
 - Artifacts: openclaw-control-center/src/ui/server.ts, openclaw-control-center/test/ui-render-smoke.test.ts, openclaw-control-center/src/runtime/openclaw-cli-insights.ts
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-16 16:10
+- Who: Erliang
+- Change: 完成小虎交付的3个输入材料任务：1）基础框架归位方案（infra/目录更合适）2）P1 Skills召回输入材料（20个skills清单+触发词+分类）3）MCP激活现状清点（3个服务+exa优先级最高）
+- Artifacts: notes/p1-skills-recall-input.md, notes/p2-mcp-activation-input.md
+- Next Owner: Q xiaohu
