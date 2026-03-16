@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "project": "control-center-phase0",
+  "mode": "readonly",
+  "coordination": {
+    "protocol": "shared-file-incremental",
+    "chatOnlyFor": [
+      "human_decision",
+      "approval",
+      "blocking_alert"
+    ]
+  },
+  "sourceOfTruth": {
+    "memory": [
+      "memory/YYYY-MM-DD.md",
+      "MEMORY.md",
+      "memory/qxiaohu-self-memory-state.json",
+      "memory/qxiaohu-collab-rules.json"
+    ],
+    "selfAlert": [
+      "memory/self_alert_state.json",
+      "runtime/self_alert_inputs/*.ndjson"
+    ],
+    "benchmark": [
+      "benchmarks/*/benchmark-config.json",
+      "benchmarks/*/summary.json",
+      "benchmarks/*/report.md"
+    ]
+  },
+  "currentSlice": {
+    "name": "benchmark-adapter-plus-settings-wiring",
+    "status": "planned",
+    "owner": "Q xiaohu"
+  },
+  "nextOwner": "Q xiaohu",
+  "supportOwner": "Erliang",
+  "deferred": [
+    "project-store",
+    "task-store",
+    "import-live",
+    "import-dry-run",
+    "approval-action-service"
+  ],
+  "updatedAt": "2026-03-16T11:06:00+08:00"
+}
