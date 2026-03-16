@@ -2,10 +2,10 @@
   "version": 2,
   "project": "control-center-phase0",
   "mode": "readonly",
-  "revision": 2,
+  "revision": 3,
   "status": "in_progress",
-  "updatedAt": "2026-03-16T11:16:00+08:00",
-  "lastUpdatedBy": "qxiaohu",
+  "updatedAt": "2026-03-16T12:30:00+08:00",
+  "lastUpdatedBy": "erliang",
   "coordination": {
     "protocol": "shared-file-incremental",
     "watchMode": "heartbeat-poll",

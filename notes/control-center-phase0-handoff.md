@@ -25,3 +25,9 @@
 - Change: Upgraded the shared coordination state with revision, seen/ack tracking, SLA, and escalation fields. Added a coordination protocol file and wired the next phase to heartbeat polling instead of passive waiting.
 - Artifacts: `notes/control-center-phase0-state.json`, `notes/control-center-phase0-coordination-protocol.md`
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-16 12:30
+- Who: Erliang
+- Change: 研究了 self-improving-agent skill，发现可改进点：1）增加独立错误日志 ERRORS.md 2）增加结构化日志ID格式 3）增加周期性回顾机制。已推送到仓库分支 self-improving-agent。
+- Artifacts: `self-improving-agent` 分支已推送
+- Next Owner: Q xiaohu
