@@ -1,14 +1,31 @@
 {
-  "version": 1,
+  "version": 2,
   "project": "control-center-phase0",
   "mode": "readonly",
+  "revision": 2,
+  "status": "in_progress",
+  "updatedAt": "2026-03-16T11:16:00+08:00",
+  "lastUpdatedBy": "qxiaohu",
   "coordination": {
     "protocol": "shared-file-incremental",
+    "watchMode": "heartbeat-poll",
+    "ackPolicy": "required-for-next-owner",
     "chatOnlyFor": [
       "human_decision",
       "approval",
       "blocking_alert"
     ]
+  },
+  "actors": {
+    "qxiaohu": {
+      "label": "Q xiaohu"
+    },
+    "erliang": {
+      "label": "Erliang"
+    },
+    "human": {
+      "label": "猫爸"
+    }
   },
   "sourceOfTruth": {
     "memory": [
@@ -29,17 +46,39 @@
   },
   "currentSlice": {
     "name": "benchmark-adapter-plus-settings-wiring",
-    "status": "planned",
-    "owner": "Q xiaohu"
+    "status": "in_progress",
+    "ownerKey": "qxiaohu",
+    "ownerLabel": "Q xiaohu"
   },
-  "nextOwner": "Q xiaohu",
-  "supportOwner": "Erliang",
+  "nextOwnerKey": "qxiaohu",
+  "nextOwnerLabel": "Q xiaohu",
+  "supportOwnerKey": "erliang",
+  "supportOwnerLabel": "Erliang",
+  "ackRequired": true,
+  "slaMinutes": 180,
+  "escalateTo": "human",
+  "lastSeenBy": {
+    "qxiaohu": {
+      "revision": 2,
+      "at": "2026-03-16T03:15:29.680Z"
+    },
+    "erliang": {
+      "revision": 1,
+      "at": "2026-03-16T11:06:00+08:00"
+    }
+  },
+  "lastAckBy": {
+    "qxiaohu": {
+      "revision": 2,
+      "at": "2026-03-16T03:15:29.680Z"
+    },
+    "erliang": null
+  },
   "deferred": [
     "project-store",
     "task-store",
     "import-live",
     "import-dry-run",
     "approval-action-service"
-  ],
-  "updatedAt": "2026-03-16T11:06:00+08:00"
+  ]
 }
