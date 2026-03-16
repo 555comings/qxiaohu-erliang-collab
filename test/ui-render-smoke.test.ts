@@ -438,7 +438,7 @@ test("usage dashboard includes token type share and cron token share sections", 
 });
 
 test("dashboard wires CLI insight cards into overview, usage, memory, and settings", async () => {
-  const source = await readFile("src/ui/server.ts", "utf8");
+  const source = (await readFile("src/ui/server.ts", "utf8")).replace(/\r\n/g, "\n");
   assert(source.includes('id="overview-connection-health"'));
   assert(source.includes('pickUiText(language, "Connection health", "接线状态")'));
   assert(source.includes('pickUiText(language, "Gateway", "网关")'));
@@ -446,6 +446,10 @@ test("dashboard wires CLI insight cards into overview, usage, memory, and settin
   assert(source.includes("去设置页补上订阅或账单快照即可。"));
   assert(source.includes('const needsConnectionHealth = activeSection === "settings";'));
   assert(source.includes("const settingsSection = `\n    ${connectionHealthCard}"));
+  assert(source.includes('${phase0BenchmarkCard}'));
+  assert(source.includes('${phase0WiringSection}'));
+  assert(source.includes('id="phase0-benchmark-card"'));
+  assert(source.includes('id="phase0-wiring-card"'));
   assert(source.includes('id="session-context-pressure"'));
   assert(source.includes('pickUiText(language, "Context pressure", "上下文压力")'));
   assert(source.includes("</section>\n    ${contextPressureCard}\n    <details class=\"card compact-details\">"));
@@ -562,8 +566,10 @@ test("editable agent scopes follow configured agents before workspace folders", 
     resolveEditableAgentScopesWithFallbackForSmoke,
   } = await import("../src/ui/server");
 
+  const normalizeWorkspacePath = (value) => value.replace(/\\/g, "/").replace(/^[A-Za-z]:/, "");
+
   assert.equal(
-    resolveOpenClawWorkspaceRootForSmoke({
+    normalizeWorkspacePath(resolveOpenClawWorkspaceRootForSmoke({
       openclawHomeDir: "/home/test/.openclaw",
       configPath: "/home/test/.openclaw/openclaw.json",
       configText: JSON.stringify({
@@ -574,20 +580,20 @@ test("editable agent scopes follow configured agents before workspace folders", 
           ],
         },
       }),
-    }),
+    })),
     "/srv/openclaw/workspace",
   );
   assert.equal(
-    resolveOpenClawWorkspaceRootForSmoke({
+    normalizeWorkspacePath(resolveOpenClawWorkspaceRootForSmoke({
       explicitWorkspaceRoot: "/data/openclaw/workspace",
       openclawHomeDir: "/home/test/.openclaw",
-    }),
+    })),
     "/data/openclaw/workspace",
   );
   assert.equal(
-    resolveOpenClawWorkspaceRootForSmoke({
+    normalizeWorkspacePath(resolveOpenClawWorkspaceRootForSmoke({
       openclawHomeDir: "/home/test/.openclaw",
-    }),
+    })),
     "/home/test/.openclaw/workspace",
   );
 

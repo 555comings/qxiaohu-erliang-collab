@@ -51,6 +51,12 @@ import {
   type OpenClawSecuritySummary,
   type OpenClawUpdateSummary,
 } from "../runtime/openclaw-cli-insights";
+import {
+  loadCachedPhase0BenchmarkSummary,
+  loadCachedPhase0WiringSummary,
+  type Phase0BenchmarkSummary,
+  type Phase0WiringSummary,
+} from "../runtime/phase0-readonly-adapters";
 import { appendOperationAudit } from "../runtime/operation-audit";
 import { ApprovalActionService } from "../runtime/approval-action-service";
 import { buildActionQueueLinks } from "../runtime/action-queue-links";
@@ -3364,6 +3370,92 @@ function renderMemoryStateSection(summary: OpenClawMemorySummary | undefined, la
   </section>`;
 }
 
+function renderPhase0BenchmarkCard(summary: Phase0BenchmarkSummary | undefined, language: UiLanguage): string {
+  if (!summary) {
+    return `<section class="card" id="phase0-benchmark-card">
+      <h2>${escapeHtml(pickUiText(language, "Benchmark baselines", "基准基线"))}</h2>
+      <div class="empty-state">${escapeHtml(pickUiText(language, "Benchmark evidence is loading.", "正在读取基准证据。"))}</div>
+    </section>`;
+  }
+
+  const headline =
+    summary.status === "blocked"
+      ? pickUiText(language, "Benchmark evidence is missing for this workspace.", "当前工作区还看不到基准证据。")
+      : summary.status === "warn"
+        ? pickUiText(language, "Benchmark evidence is visible, but at least one suite still needs attention.", "基准证据已接入，但至少有一套还需要检查。")
+        : pickUiText(language, "The current benchmark baseline is visible and healthy.", "当前基准基线已接入且状态正常。");
+
+  const suitesHtml = summary.suites
+    .map((suite) => {
+      const detailParts = [
+        `${formatInt(suite.scenarioCount)} ${pickUiText(language, "scenarios", "场景")}`,
+        `${formatInt(suite.observedHosts)} ${pickUiText(language, "hosts", "机器")}`,
+      ];
+      if (suite.latestHost) detailParts.push(suite.latestHost);
+      if (suite.latestTag) detailParts.push(suite.latestTag);
+      return `<div class="decision-row">
+        <div class="decision-row-copy">
+          <strong>${escapeHtml(suite.label)}</strong>
+          <div class="meta">${badge(suite.status, insightStatusLabel(suite.status, language))} ${escapeHtml(detailParts.join(" · "))}</div>
+          <div class="meta">${escapeHtml(suite.keyMetricLabel)} · ${escapeHtml(suite.keyMetricValue)}${suite.latestGeneratedAt ? ` · ${escapeHtml(pickUiText(language, `updated ${formatTimeAgoFromNow(suite.latestGeneratedAt, language)}`, `${formatTimeAgoFromNow(suite.latestGeneratedAt, language)} 更新`))}` : ""}</div>
+        </div>
+        <div class="decision-row-value">${escapeHtml(suite.failingScenarioCount > 0 ? String(suite.failingScenarioCount) : pickUiText(language, "PASS", "通过"))}</div>
+      </div>`;
+    })
+    .join("");
+
+  return `<section class="card" id="phase0-benchmark-card">
+    <div class="overview-command-head">
+      <div>
+        <h2>${escapeHtml(pickUiText(language, "Benchmark baselines", "基准基线"))}</h2>
+        <div class="meta">${escapeHtml(headline)}</div>
+      </div>
+      <div>${badge(summary.status, insightStatusLabel(summary.status, language))}</div>
+    </div>
+    <div class="status-strip">
+      <div class="status-chip"><span>${escapeHtml(pickUiText(language, "Healthy suites", "正常套件"))}</span><strong>${summary.completeSuiteCount}</strong></div>
+      <div class="status-chip"><span>${escapeHtml(pickUiText(language, "Expected", "期望总数"))}</span><strong>${summary.expectedSuiteCount}</strong></div>
+      <div class="status-chip"><span>${escapeHtml(pickUiText(language, "Benchmark root", "证据根目录"))}</span><strong>${escapeHtml(summary.rootExists ? pickUiText(language, "Visible", "可见") : pickUiText(language, "Missing", "缺失"))}</strong></div>
+    </div>
+    <div class="meta">${escapeHtml(summary.rootPath ?? pickUiText(language, "No benchmark root found", "未发现基准根目录"))}</div>
+    <div class="decision-list">${suitesHtml}</div>
+  </section>`;
+}
+
+function renderPhase0WiringSection(summary: Phase0WiringSummary | undefined, language: UiLanguage): string {
+  if (!summary) {
+    return `<section class="card" id="phase0-wiring-card">
+      <h2>${escapeHtml(pickUiText(language, "Phase-0 wiring", "Phase-0 接线状态"))}</h2>
+      <div class="empty-state">${escapeHtml(pickUiText(language, "Readonly integration wiring is loading.", "正在读取只读接线状态。"))}</div>
+    </section>`;
+  }
+
+  const rows = summary.items
+    .map(
+      (item) => `<tr>
+        <td>${escapeHtml(item.label)}</td>
+        <td>${badge(item.status, insightStatusLabel(item.status, language))}</td>
+        <td>${escapeHtml(item.value)}</td>
+        <td>${escapeHtml(item.detail)}</td>
+      </tr>`,
+    )
+    .join("");
+
+  return `<section class="card" id="phase0-wiring-card">
+    <div class="overview-command-head">
+      <div>
+        <h2>${escapeHtml(pickUiText(language, "Phase-0 wiring", "Phase-0 接线状态"))}</h2>
+        <div class="meta">${escapeHtml(pickUiText(language, "Readonly integration checks the benchmark evidence path and the shared coordination files before touching deeper adapters.", "只读接入会先检查 benchmark 证据路径和共享协作文件，再继续接更深的适配器。"))}</div>
+      </div>
+      <div>${badge(summary.status, insightStatusLabel(summary.status, language))}</div>
+    </div>
+    <table>
+      <thead><tr><th>${escapeHtml(pickUiText(language, "Item", "项目"))}</th><th>${escapeHtml(pickUiText(language, "Status", "状态"))}</th><th>${escapeHtml(pickUiText(language, "Value", "当前值"))}</th><th>${escapeHtml(pickUiText(language, "Detail", "说明"))}</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </section>`;
+}
+
 function scoreCoverageStatus(status: DataCoverageStatus): number {
   if (status === "connected") return 100;
   if (status === "partial") return 55;
@@ -4504,6 +4596,8 @@ async function renderHtml(
   const needsUpdateSummary = activeSection === "settings";
   const needsMemoryState = activeSection === "memory";
   const needsCollaborationThreads = activeSection === "collaboration";
+  const needsPhase0Benchmark = activeSection === "overview" || activeSection === "settings";
+  const needsPhase0Wiring = activeSection === "settings";
   markRenderPhase("snapshot");
   const exceptions = commanderExceptions(snapshot);
   const exceptionsFeed = commanderExceptionsFeed(snapshot);
@@ -4552,7 +4646,7 @@ async function renderHtml(
     loadCachedOfficeSessionPresence(),
   ]);
   markRenderPhase("shared-data");
-  const [teamSnapshot, memoryFiles, memoryFacetOptions, workspaceFiles, workspaceFacetOptions, taskEvidenceItems, connectionHealthSummary, securitySummary, updateSummary, memoryStateSummary] = await Promise.all([
+  const [teamSnapshot, memoryFiles, memoryFacetOptions, workspaceFiles, workspaceFacetOptions, taskEvidenceItems, connectionHealthSummary, securitySummary, updateSummary, memoryStateSummary, phase0BenchmarkSummary, phase0WiringSummary] = await Promise.all([
     needsTeamSnapshot
       ? loadTeamSnapshot(officeRoster)
       : Promise.resolve<TeamSnapshot>({
@@ -4577,6 +4671,8 @@ async function renderHtml(
     needsSecuritySummary ? loadCachedOpenClawSecuritySummary() : Promise.resolve<OpenClawSecuritySummary | undefined>(undefined),
     needsUpdateSummary ? loadCachedOpenClawUpdateSummary() : Promise.resolve<OpenClawUpdateSummary | undefined>(undefined),
     needsMemoryState ? loadCachedOpenClawMemorySummary() : Promise.resolve<OpenClawMemorySummary | undefined>(undefined),
+    needsPhase0Benchmark ? loadCachedPhase0BenchmarkSummary(OPENCLAW_WORKSPACE_ROOT) : Promise.resolve<Phase0BenchmarkSummary | undefined>(undefined),
+    needsPhase0Wiring ? loadCachedPhase0WiringSummary(OPENCLAW_WORKSPACE_ROOT) : Promise.resolve<Phase0WiringSummary | undefined>(undefined),
   ]);
   markRenderPhase("section-assets");
   const usageToday = usageCost.periods.find((item) => item.key === "today");
@@ -5365,6 +5461,8 @@ async function renderHtml(
   const updateStatusSection = renderOpenClawUpdateSection(updateSummary, options.language);
   const contextPressureCard = renderContextPressureCard(usageCost, options.language);
   const memoryStateSection = renderMemoryStateSection(memoryStateSummary, options.language);
+  const phase0BenchmarkCard = renderPhase0BenchmarkCard(phase0BenchmarkSummary, options.language);
+  const phase0WiringSection = renderPhase0WiringSection(phase0WiringSummary, options.language);
   const overviewUsagePeriods = isTodayUsageView
     ? usageCost.periods.filter((item) => item.key === "today")
     : usageCost.periods.filter((item) => item.key === "today" || item.key === "7d");
@@ -5687,6 +5785,7 @@ async function renderHtml(
               : `<div class="status-strip ${options.compactStatusStrip ? "compact" : "expanded"}">${signalStrip}</div>`
           }
         </article>
+        ${phase0BenchmarkCard}
         <section class="card" id="cron-health">
           <div class="overview-command-head">
             <h2>${escapeHtml(t("Runtime checkpoint", "运行检查点"))}</h2>
@@ -6296,6 +6395,8 @@ async function renderHtml(
   `;
   const settingsSection = `
     ${connectionHealthCard}
+    ${phase0BenchmarkCard}
+    ${phase0WiringSection}
     ${securityRiskSection}
     ${updateStatusSection}
     <section class="card">
