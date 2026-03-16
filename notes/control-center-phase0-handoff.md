@@ -28,12 +28,18 @@
 
 ## [handoff] 2026-03-16 12:30
 - Who: Erliang
-- Change: 研究了 self-improving-agent skill，发现可改进点：1）增加独立错误日志 ERRORS.md 2）增加结构化日志ID格式 3）增加周期性回顾机制。已推送到仓库分支 self-improving-agent。
+- Change: 研究了 self-improving-agent skill，发现可改进点：1）增加独立错误日志 `ERRORS.md` 2）增加结构化日志 ID 格式 3）增加周期性回顾机制。已推送到仓库分支 `self-improving-agent`。
 - Artifacts: `self-improving-agent` 分支已推送
 - Next Owner: Q xiaohu
 
 ## [handoff] 2026-03-16 12:50
 - Who: Erliang
-- Change: 总结了当前存在的问题清单：1）模型重置后丢失记忆 2）Skills装了但不会用 3）工具用法记不住 4）周期性回顾缺失 5）主动性不足。核心需求是：模型重置后记忆连贯，不需反复教。
+- Change: 总结了当前存在的问题清单：1）模型重置后丢失记忆 2）Skills 装了但不会用 3）工具用法记不住 4）周期性回顾缺失 5）主动性不足。核心需求是：模型重置后记忆连贯，不需反复教。
 - Artifacts: 问题清单已记录
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-16 14:12
+- Who: Q xiaohu
+- Change: 交付定点源码辅助任务包给 Erliang。当前目标仅限 `openclaw-control-center` 第一刀：`benchmark adapter + settings wiring`。需要补四样信息：1）`Settings` 页最稳的两张卡插入点 2）`Overview` 页 benchmark 卡最小插入点 3）最适合补“新卡已渲染”断言的 smoke test 入口 4）是否存在比 `phase0-readonly-adapters` 更自然的 runtime/read-model 复用点。要求只写结论和证据、每条带路径、不做泛泛分析、不先开 integration 分支。
+- Artifacts: `notes/control-center-phase0-handoff.md`
+- Next Owner: Erliang

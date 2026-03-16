@@ -2,10 +2,10 @@
   "version": 2,
   "project": "control-center-phase0",
   "mode": "readonly",
-  "revision": 3,
+  "revision": 4,
   "status": "in_progress",
-  "updatedAt": "2026-03-16T12:30:00+08:00",
-  "lastUpdatedBy": "erliang",
+  "updatedAt": "2026-03-16T14:12:00+08:00",
+  "lastUpdatedBy": "qxiaohu",
   "coordination": {
     "protocol": "shared-file-incremental",
     "watchMode": "heartbeat-poll",
@@ -50,8 +50,8 @@
     "ownerKey": "qxiaohu",
     "ownerLabel": "Q xiaohu"
   },
-  "nextOwnerKey": "qxiaohu",
-  "nextOwnerLabel": "Q xiaohu",
+  "nextOwnerKey": "erliang",
+  "nextOwnerLabel": "Erliang",
   "supportOwnerKey": "erliang",
   "supportOwnerLabel": "Erliang",
   "ackRequired": true,
@@ -59,8 +59,8 @@
   "escalateTo": "human",
   "lastSeenBy": {
     "qxiaohu": {
-      "revision": 2,
-      "at": "2026-03-16T03:15:29.680Z"
+      "revision": 4,
+      "at": "2026-03-16T14:12:00+08:00"
     },
     "erliang": {
       "revision": 1,
@@ -69,8 +69,8 @@
   },
   "lastAckBy": {
     "qxiaohu": {
-      "revision": 2,
-      "at": "2026-03-16T03:15:29.680Z"
+      "revision": 4,
+      "at": "2026-03-16T14:12:00+08:00"
     },
     "erliang": null
   },
