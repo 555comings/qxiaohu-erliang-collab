@@ -13,3 +13,9 @@
 - Change: Started the cross-computer memory continuity bootstrap. Created a shared startup context and a shared collaboration-rules file because Q xiaohu local workspace memory files are not valid shared truth for Erliang on another machine. This slice establishes a common read path before wiring startup hooks or skill recall.
 - Artifacts: `memory/shared-startup-context.md`, `memory/shared-collab-rules.json`, `notes/memory-continuity-state.json`, `plans/shared-memory-source-of-truth-v1.md`
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-17 02:08
+- Who: Q xiaohu
+- Change: Added the minimal shared active-state layer. The shared startup chain now includes `memory/shared-active-state.json`, which carries active focus, open loops, do-now items, and do-not-do items for cross-computer startup recovery.
+- Artifacts: `memory/shared-active-state.json`, `memory/shared-startup-context.md`, `notes/memory-continuity-state.json`
+- Next Owner: Q xiaohu

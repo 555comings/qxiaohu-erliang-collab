@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-17T02:08:00+08:00",
+  "updatedBy": "qxiaohu",
+  "activeFocus": [
+    {
+      "id": "shared-memory-continuity",
+      "summary": "Stabilize cross-session memory continuity across Q xiaohu and Erliang using shared startup truth instead of local-only files.",
+      "status": "active",
+      "owner": "qxiaohu"
+    },
+    {
+      "id": "shared-startup-chain",
+      "summary": "Make Erliang startup read the shared startup files first and report missing paths instead of guessing.",
+      "status": "active",
+      "owner": "qxiaohu"
+    }
+  ],
+  "openLoops": [
+    {
+      "id": "shared-active-state-hook",
+      "summary": "Teach startup flow to read this shared active-state file as part of the default recovery chain.",
+      "nextAction": "Keep `memory/shared-active-state.json` in the startup read order and require a short recovery confirmation.",
+      "owner": "qxiaohu"
+    },
+    {
+      "id": "skills-recall-layer",
+      "summary": "Connect the existing P1 skills input material to the shared startup chain.",
+      "nextAction": "Define the smallest trigger-based recall layer after shared startup files stabilize.",
+      "owner": "qxiaohu"
+    },
+    {
+      "id": "mcp-activation-layer",
+      "summary": "Connect the existing P2 MCP activation input material to the shared startup chain.",
+      "nextAction": "Prioritize Exa first after the shared startup and active-state layers are stable.",
+      "owner": "qxiaohu"
+    }
+  ],
+  "doNow": [
+    "Read shared startup files first.",
+    "Use shared active focus and open loops to explain current status.",
+    "Do not assume Q xiaohu local workspace files are visible on Erliang machine."
+  ],
+  "doNotDo": [
+    "Do not invent missing shared files.",
+    "Do not resolve shared git conflicts without explicit direction.",
+    "Do not treat local-only files as shared source of truth."
+  ]
+}

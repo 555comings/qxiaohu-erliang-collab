@@ -7,10 +7,11 @@ Read this before starting work that depends on shared memory or collaboration ru
 
 1. `memory/shared-startup-context.md`
 2. `memory/shared-collab-rules.json`
-3. `notes/memory-continuity-handoff.md`
-4. `notes/memory-continuity-state.json`
-5. `notes/p1-skills-recall-input.md`
-6. `notes/p2-mcp-activation-input.md`
+3. `memory/shared-active-state.json`
+4. `notes/memory-continuity-handoff.md`
+5. `notes/memory-continuity-state.json`
+6. `notes/p1-skills-recall-input.md`
+7. `notes/p2-mcp-activation-input.md`
 
 If one of these paths is missing, report the missing path and stop guessing.
 Do not create a substitute file unless explicitly asked.
@@ -46,4 +47,5 @@ The immediate goal is to stop relying on Q xiaohu local-only files for cross-age
 1. Bootstrap shared source-of-truth files.
 2. Wire startup reading to these shared files.
 3. Add shared active-state/current-focus handling.
-4. Layer in Skills recall and MCP activation on top of the shared startup chain.
+4. Require a short startup recovery confirmation against the shared active-state file.
+5. Layer in Skills recall and MCP activation on top of the shared startup chain.

@@ -1,9 +1,9 @@
 {
   "version": 1,
   "project": "memory-continuity",
-  "revision": 1,
+  "revision": 2,
   "status": "in_progress",
-  "updatedAt": "2026-03-17T01:10:00+08:00",
+  "updatedAt": "2026-03-17T02:08:00+08:00",
   "lastUpdatedBy": "qxiaohu",
   "coordination": {
     "protocol": "shared-file-incremental",
@@ -29,7 +29,8 @@
   "sourceOfTruth": {
     "sharedStartup": [
       "memory/shared-startup-context.md",
-      "memory/shared-collab-rules.json"
+      "memory/shared-collab-rules.json",
+      "memory/shared-active-state.json"
     ],
     "worklog": [
       "notes/memory-continuity-handoff.md",
@@ -44,7 +45,7 @@
     ]
   },
   "currentSlice": {
-    "name": "shared-source-of-truth-bootstrap",
+    "name": "shared-active-state",
     "status": "in_progress",
     "ownerKey": "qxiaohu",
     "ownerLabel": "Q xiaohu"
@@ -58,21 +59,21 @@
   "escalateTo": "human",
   "lastSeenBy": {
     "qxiaohu": {
-      "revision": 1,
-      "at": "2026-03-17T01:10:00+08:00"
+      "revision": 2,
+      "at": "2026-03-17T02:08:00+08:00"
     },
     "erliang": null
   },
   "lastAckBy": {
     "qxiaohu": {
-      "revision": 1,
-      "at": "2026-03-17T01:10:00+08:00"
+      "revision": 2,
+      "at": "2026-03-17T02:08:00+08:00"
     },
     "erliang": null
   },
   "deferred": [
     "shared-startup-hook",
-    "shared-active-state",
+    "startup-recovery-confirmation",
     "skills-recall-integration",
     "mcp-activation-integration"
   ]
