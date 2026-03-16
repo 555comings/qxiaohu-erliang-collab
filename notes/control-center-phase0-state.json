@@ -2,10 +2,10 @@
   "version": 2,
   "project": "control-center-phase0",
   "mode": "readonly",
-  "revision": 4,
+  "revision": 5,
   "status": "in_progress",
-  "updatedAt": "2026-03-16T14:12:00+08:00",
-  "lastUpdatedBy": "qxiaohu",
+  "updatedAt": "2026-03-16T14:18:00+08:00",
+  "lastUpdatedBy": "erliang",
   "coordination": {
     "protocol": "shared-file-incremental",
     "watchMode": "heartbeat-poll",
@@ -63,8 +63,8 @@
       "at": "2026-03-16T14:12:00+08:00"
     },
     "erliang": {
-      "revision": 1,
-      "at": "2026-03-16T11:06:00+08:00"
+      "revision": 4,
+      "at": "2026-03-16T06:16:32.236Z"
     }
   },
   "lastAckBy": {
@@ -72,7 +72,10 @@
       "revision": 4,
       "at": "2026-03-16T14:12:00+08:00"
     },
-    "erliang": null
+    "erliang": {
+      "revision": 4,
+      "at": "2026-03-16T06:16:32.236Z"
+    }
   },
   "deferred": [
     "project-store",

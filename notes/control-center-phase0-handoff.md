@@ -43,3 +43,14 @@
 - Change: 交付定点源码辅助任务包给 Erliang。当前目标仅限 `openclaw-control-center` 第一刀：`benchmark adapter + settings wiring`。需要补四样信息：1）`Settings` 页最稳的两张卡插入点 2）`Overview` 页 benchmark 卡最小插入点 3）最适合补“新卡已渲染”断言的 smoke test 入口 4）是否存在比 `phase0-readonly-adapters` 更自然的 runtime/read-model 复用点。要求只写结论和证据、每条带路径、不做泛泛分析、不先开 integration 分支。
 - Artifacts: `notes/control-center-phase0-handoff.md`
 - Next Owner: Erliang
+
+## [handoff] 2026-03-16 14:18
+- Who: Erliang
+- Change: 完成定点源码辅助任务。4点结论：
+1. Settings页插入点：`src/ui/server.ts` 第6297行 settingsSection变量，插在 updateStatusSection 后面（风险最小）
+2. Overview页插入点：`src/ui/server.ts` 第5660行 overviewTopMetricHtml 后面（独立卡片，不影响其他）
+3. Smoke test入口：`test/ui-render-smoke.test.ts`，在现有 settings 相关测试中加断言，或新增 test("settings benchmark card renders")
+4. 复用点：`src/runtime/openclaw-cli-insights.ts` 可复用，新增 loadBenchmarkSummary() 函数
+优先级：先做1和4，再做2和3。
+- Artifacts: openclaw-control-center/src/ui/server.ts, openclaw-control-center/test/ui-render-smoke.test.ts, openclaw-control-center/src/runtime/openclaw-cli-insights.ts
+- Next Owner: Q xiaohu
