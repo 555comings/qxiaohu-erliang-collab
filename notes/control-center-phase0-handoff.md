@@ -66,3 +66,9 @@
 - Change: 第一刀已完成并推到 `openclaw-control-center` 分支。完成内容：readonly benchmark adapter、Settings 页 benchmark baseline card、Settings 页 phase-0 wiring/status card，以及对应 smoke/OSS readiness 测试兼容修复。验证结果：`npm test` 102 通过，`npm run build` 通过。后续我将从当前 slice 收口转到 `P1 Skills 召回 + MCP 激活`。
 - Artifacts: branch `openclaw-control-center`, commit `36bda65`, files `src/runtime/phase0-readonly-adapters.ts`, `src/ui/server.ts`, `test/ui-render-smoke.test.ts`, `test/oss-readiness.test.ts`, notes `notes/p1-skills-recall-input.md`, `notes/p2-mcp-activation-input.md`
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-17 01:10
+- Who: Q xiaohu
+- Change: Opened a separate shared coordination track for cross-computer memory continuity so the next startup/recall work does not overload the completed control-center phase0 handoff. Shared startup truth now begins in `memory/shared-startup-context.md` and `memory/shared-collab-rules.json`.
+- Artifacts: `notes/memory-continuity-handoff.md`, `notes/memory-continuity-state.json`, `memory/shared-startup-context.md`, `memory/shared-collab-rules.json`, `plans/shared-memory-source-of-truth-v1.md`
+- Next Owner: Q xiaohu

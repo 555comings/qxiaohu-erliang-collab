@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "project": "memory-continuity",
+  "revision": 1,
+  "status": "in_progress",
+  "updatedAt": "2026-03-17T01:10:00+08:00",
+  "lastUpdatedBy": "qxiaohu",
+  "coordination": {
+    "protocol": "shared-file-incremental",
+    "watchMode": "heartbeat-poll",
+    "ackPolicy": "required-for-next-owner",
+    "chatOnlyFor": [
+      "human_decision",
+      "approval",
+      "blocking_alert"
+    ]
+  },
+  "actors": {
+    "qxiaohu": {
+      "label": "Q xiaohu"
+    },
+    "erliang": {
+      "label": "Erliang"
+    },
+    "human": {
+      "label": "猫爸"
+    }
+  },
+  "sourceOfTruth": {
+    "sharedStartup": [
+      "memory/shared-startup-context.md",
+      "memory/shared-collab-rules.json"
+    ],
+    "worklog": [
+      "notes/memory-continuity-handoff.md",
+      "notes/memory-continuity-state.json"
+    ],
+    "inputMaterials": [
+      "notes/p1-skills-recall-input.md",
+      "notes/p2-mcp-activation-input.md"
+    ],
+    "plan": [
+      "plans/shared-memory-source-of-truth-v1.md"
+    ]
+  },
+  "currentSlice": {
+    "name": "shared-source-of-truth-bootstrap",
+    "status": "in_progress",
+    "ownerKey": "qxiaohu",
+    "ownerLabel": "Q xiaohu"
+  },
+  "nextOwnerKey": "qxiaohu",
+  "nextOwnerLabel": "Q xiaohu",
+  "supportOwnerKey": "erliang",
+  "supportOwnerLabel": "Erliang",
+  "ackRequired": false,
+  "slaMinutes": 180,
+  "escalateTo": "human",
+  "lastSeenBy": {
+    "qxiaohu": {
+      "revision": 1,
+      "at": "2026-03-17T01:10:00+08:00"
+    },
+    "erliang": null
+  },
+  "lastAckBy": {
+    "qxiaohu": {
+      "revision": 1,
+      "at": "2026-03-17T01:10:00+08:00"
+    },
+    "erliang": null
+  },
+  "deferred": [
+    "shared-startup-hook",
+    "shared-active-state",
+    "skills-recall-integration",
+    "mcp-activation-integration"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "owner": "shared",
+  "updatedAt": "2026-03-17T01:10:00+08:00",
+  "purpose": "Cross-computer collaboration rules that both Q xiaohu and Erliang can read from the same repo.",
+  "userPreferences": {
+    "addressUserAs": {
+      "value": "猫爸",
+      "status": "verified"
+    },
+    "relayToErliangPlainText": {
+      "value": true,
+      "status": "verified",
+      "note": "Forwardable text for Erliang should stay plain text and avoid code blocks."
+    },
+    "copyReadyNoFiller": {
+      "value": true,
+      "status": "verified"
+    }
+  },
+  "startup": {
+    "readFirst": [
+      "memory/shared-startup-context.md",
+      "notes/memory-continuity-handoff.md",
+      "notes/memory-continuity-state.json"
+    ],
+    "ifMissing": "Report the missing path; do not invent a replacement file.",
+    "doNotAssumeShared": [
+      "MEMORY.md",
+      "memory/qxiaohu-collab-rules.json",
+      "memory/qxiaohu-self-memory-state.json"
+    ]
+  },
+  "coordination": {
+    "defaultChannel": "shared-file-incremental",
+    "sharedFilesFirst": true,
+    "useChatOnlyFor": [
+      "human_decision",
+      "approval",
+      "blocking_alert"
+    ],
+    "crossComputerRule": "Local workspace files are not shared truth unless they are committed here or otherwise synchronized into a common store."
+  },
+  "gitSafety": {
+    "onConflict": [
+      "stop",
+      "prefer git merge --abort",
+      "use git pull --ff-only when possible",
+      "report status before choosing a side"
+    ],
+    "forbiddenWithoutExplicitDirection": [
+      "git stash pop conflict resolution",
+      "manual ours/theirs conflict selection",
+      "git reset --hard on shared work"
+    ],
+    "divergedLocalCommitRule": "Create a backup branch or ref before any destructive recovery step."
+  },
+  "roles": {
+    "qxiaohu": "Primary builder/operator for implementation and architecture.",
+    "erliang": "Support role for review, input gathering, summaries, and low-risk coordination until startup recall and git safety stabilize."
+  }
+}
