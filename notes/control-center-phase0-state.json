@@ -2,10 +2,10 @@
   "version": 2,
   "project": "control-center-phase0",
   "mode": "readonly",
-  "revision": 6,
+  "revision": 7,
   "status": "in_progress",
-  "updatedAt": "2026-03-16T16:10:00+08:00",
-  "lastUpdatedBy": "erliang",
+  "updatedAt": "2026-03-16T17:24:00+08:00",
+  "lastUpdatedBy": "qxiaohu",
   "coordination": {
     "protocol": "shared-file-incremental",
     "watchMode": "heartbeat-poll",
@@ -50,21 +50,21 @@
   },
   "currentSlice": {
     "name": "benchmark-adapter-plus-settings-wiring",
-    "status": "in_progress",
+    "status": "complete",
     "ownerKey": "qxiaohu",
     "ownerLabel": "Q xiaohu"
   },
-  "nextOwnerKey": "erliang",
-  "nextOwnerLabel": "Erliang",
+  "nextOwnerKey": "qxiaohu",
+  "nextOwnerLabel": "Q xiaohu",
   "supportOwnerKey": "erliang",
   "supportOwnerLabel": "Erliang",
-  "ackRequired": true,
+  "ackRequired": false,
   "slaMinutes": 180,
   "escalateTo": "human",
   "lastSeenBy": {
     "qxiaohu": {
-      "revision": 5,
-      "at": "2026-03-16T14:12:00+08:00"
+      "revision": 7,
+      "at": "2026-03-16T17:24:00+08:00"
     },
     "erliang": {
       "revision": 6,
@@ -73,8 +73,8 @@
   },
   "lastAckBy": {
     "qxiaohu": {
-      "revision": 5,
-      "at": "2026-03-16T14:12:00+08:00"
+      "revision": 7,
+      "at": "2026-03-16T17:24:00+08:00"
     },
     "erliang": {
       "revision": 6,
