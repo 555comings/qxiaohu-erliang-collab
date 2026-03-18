@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "title": "P3.2 Skills Recall example corpus v1",
+  "purpose": "Small representative corpus of bounded recall packets for real work after the P3.1 execution-truth layer.",
+  "created_for": "P3.2 Skills Recall",
+  "references": [
+    "plans/p3-2-skills-recall-v1.md",
+    "plans/p3-2-skills-recall-packet-schema-v1.json",
+    "plans/p3-2-skills-recall-source-map-v1.md",
+    "scripts/SKILLS_RECALL_PREVIEW.md"
+  ],
+  "coverage": [
+    "startup recovery follow-up",
+    "rework and ETA discipline",
+    "tool or skill invocation"
+  ],
+  "scenarios": [
+    {
+      "id": "startup-recovery-follow-up",
+      "theme": "startup recovery follow-up",
+      "why_it_matters": "Shows the resume-style packet shape when execution truth is already restored and the next question is which local protocol to read before continuing.",
+      "input_context": {
+        "task_title": "Resume the startup recovery follow-up after restart",
+        "task_path": "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+        "user_request": "Confirm the next bounded follow-up before touching shared state again.",
+        "representative_mode": "resume-style example grounded in the existing startup recovery artifacts"
+      },
+      "packet": {
+        "trigger": "active-item-resume",
+        "active_item": {
+          "id": "p3-1-final-e2e-follow-up",
+          "title": "Resume the startup recovery follow-up after restart",
+          "state": "started",
+          "owner": "qxiaohu",
+          "artifact_hint": "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+          "notes": "P3.1 already picked the trustworthy work item; this packet only restores the smallest supporting context for the next bounded step.",
+          "expected_artifacts": [
+            "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+            "plans/p3-1-startup-recovery-transition-to-skills-recall-v1.md"
+          ],
+          "evidence_paths": [
+            "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md"
+          ],
+          "evidence_commands": [
+            "node scripts/startup_recovery_check.mjs doctor qxiaohu notes/startup-recovery-state.json"
+          ]
+        },
+        "recall_candidates": [
+          {
+            "source_path": "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+            "source_kind": "active-item-evidence",
+            "why_recalled": "The recovered item already points at this note, so it is the most trustworthy first anchor for the bounded follow-up.",
+            "required_before_action": true,
+            "matched_from": [
+              "artifact_hint",
+              "evidence_path"
+            ],
+            "source_tier": "S0",
+            "priority_index": 0
+          },
+          {
+            "source_path": "memory/qxiaohu-collab-rules.json",
+            "source_kind": "workspace-note",
+            "why_recalled": "The follow-up still sits inside shared Qxiaohu and Erliang collaboration, so the structured handoff and stop-and-escalate defaults are the smallest reusable operating contract to reload.",
+            "required_before_action": true,
+            "matched_from": [
+              "workflow_type",
+              "mandatory_protocol_gap"
+            ],
+            "source_tier": "S1",
+            "priority_index": 1
+          },
+          {
+            "source_path": "plans/p3-1-startup-recovery-transition-to-skills-recall-v1.md",
+            "source_kind": "collab-runbook",
+            "why_recalled": "This note is the clearest local boundary that says startup recovery still owns execution truth while Skills Recall only restores supporting context.",
+            "required_before_action": false,
+            "matched_from": [
+              "expected_artifacts",
+              "workflow_type"
+            ],
+            "source_tier": "S2",
+            "priority_index": 2
+          }
+        ],
+        "boundary": {
+          "startup_recovery_status": "already decided by P3.1 doctor or resume-hottest before this packet is produced",
+          "does_not_update_promise_state": true,
+          "does_not_override_hottest_item": true,
+          "does_not_start_external_actions": true
+        }
+      }
+    },
+    {
+      "id": "rework-eta-discipline",
+      "theme": "rework and ETA discipline",
+      "why_it_matters": "Captures the review or rework case where the main risk is not missing execution truth but missing reusable guardrails for ETA sync, readability, and handoff discipline.",
+      "input_context": {
+        "task_title": "Tighten the next reviewer rework pass",
+        "task_path": "plans/p3-2-skills-recall-packet-review-gate-v1.md",
+        "user_request": "Enter rework, sync an ETA, and make sure the artifact is readable before review.",
+        "representative_mode": "task-context example grounded in the current review gate artifact"
+      },
+      "packet": {
+        "trigger": "mandatory-protocol-gap",
+        "active_item": {
+          "id": "p3-2-review-gate-rework-pass",
+          "title": "Tighten the next reviewer rework pass",
+          "state": "task-context",
+          "owner": "qxiaohu",
+          "artifact_hint": "plans/p3-2-skills-recall-packet-review-gate-v1.md",
+          "notes": "The packet exists to surface rework discipline before any new review-round status message or handoff.",
+          "expected_artifacts": [
+            "plans/p3-2-skills-recall-packet-review-gate-v1.md"
+          ],
+          "evidence_paths": [
+            "plans/p3-2-skills-recall-packet-review-gate-v1.md"
+          ]
+        },
+        "recall_candidates": [
+          {
+            "source_path": "plans/p3-2-skills-recall-packet-review-gate-v1.md",
+            "source_kind": "active-item-evidence",
+            "why_recalled": "The current task already names this artifact, so it remains the first bounded anchor for the rework pass.",
+            "required_before_action": true,
+            "matched_from": [
+              "artifact_hint",
+              "task_path"
+            ],
+            "source_tier": "S0",
+            "priority_index": 0
+          },
+          {
+            "source_path": "outputs/stage3-retrospective-v1.md",
+            "source_kind": "collab-runbook",
+            "why_recalled": "The user request explicitly carries rework, ETA, and readability risk, so the retrospective is the most direct reusable runbook to surface before acting.",
+            "required_before_action": true,
+            "matched_from": [
+              "title",
+              "user_request",
+              "mandatory_protocol_gap"
+            ],
+            "source_tier": "S2",
+            "priority_index": 1
+          },
+          {
+            "source_path": "memory/qxiaohu-collab-rules.json",
+            "source_kind": "workspace-note",
+            "why_recalled": "The structured collaboration rules carry the compact reminders that chat status is not execution status and that rework should sync an ETA before handoff.",
+            "required_before_action": false,
+            "matched_from": [
+              "workflow_type",
+              "mandatory_protocol_gap"
+            ],
+            "source_tier": "S1",
+            "priority_index": 2
+          }
+        ],
+        "boundary": {
+          "startup_recovery_status": "task context supplied directly; no startup state change performed",
+          "does_not_update_promise_state": true,
+          "does_not_override_hottest_item": true,
+          "does_not_start_external_actions": true
+        }
+      }
+    },
+    {
+      "id": "feishu-doc-skill-invocation",
+      "theme": "tool or skill invocation",
+      "why_it_matters": "Shows the bounded packet when the task text clearly points to one installed skill and one local handoff runbook, without reading every available skill.",
+      "input_context": {
+        "task_title": "Patch the cloud doc handoff note",
+        "task_path": "notes/p3-2-skills-recall-kickoff-handoff-v1.md",
+        "user_request": "Open the cloud doc link, patch the latest handoff summary, and leave a clean doc update.",
+        "representative_mode": "task-context example grounded in the existing kickoff handoff note"
+      },
+      "packet": {
+        "trigger": "domain-or-tool-hint",
+        "active_item": {
+          "id": "p3-2-cloud-doc-handoff-update",
+          "title": "Patch the cloud doc handoff note",
+          "state": "task-context",
+          "owner": "qxiaohu",
+          "artifact_hint": "notes/p3-2-skills-recall-kickoff-handoff-v1.md",
+          "notes": "The active item is stable already; the open question is which single installed skill and which local checklist should be reloaded before editing the cloud doc.",
+          "expected_artifacts": [
+            "notes/p3-2-skills-recall-kickoff-handoff-v1.md",
+            "outputs/execution-checklist-v2.md"
+          ],
+          "evidence_paths": [
+            "notes/p3-2-skills-recall-kickoff-handoff-v1.md"
+          ]
+        },
+        "recall_candidates": [
+          {
+            "source_path": "notes/p3-2-skills-recall-kickoff-handoff-v1.md",
+            "source_kind": "active-item-evidence",
+            "why_recalled": "The task path already names the exact kickoff handoff artifact, so that note stays the first anchor.",
+            "required_before_action": true,
+            "matched_from": [
+              "artifact_hint",
+              "task_path"
+            ],
+            "source_tier": "S0",
+            "priority_index": 0
+          },
+          {
+            "source_path": "outputs/execution-checklist-v2.md",
+            "source_kind": "collab-runbook",
+            "why_recalled": "The task ends in a handoff-ready update, so the standard execution checklist is the right local runbook to surface before editing and relaying the result.",
+            "required_before_action": true,
+            "matched_from": [
+              "title",
+              "user_request",
+              "mandatory_protocol_gap"
+            ],
+            "source_tier": "S2",
+            "priority_index": 1
+          },
+          {
+            "source_path": "D:/openclaw/openclaw_app/node_modules/openclaw/extensions/feishu/skills/feishu-doc/SKILL.md",
+            "source_kind": "installed-skill",
+            "why_recalled": "The task text mentions a cloud doc link, which is the clearest single-domain hint to reload the installed feishu-doc skill before action.",
+            "required_before_action": true,
+            "matched_from": [
+              "title",
+              "user_request",
+              "domain_or_tool_hint"
+            ],
+            "source_tier": "S3",
+            "priority_index": 2
+          }
+        ],
+        "boundary": {
+          "startup_recovery_status": "task context supplied directly; no startup state change performed",
+          "does_not_update_promise_state": true,
+          "does_not_override_hottest_item": true,
+          "does_not_start_external_actions": true
+        }
+      }
+    }
+  ]
+}

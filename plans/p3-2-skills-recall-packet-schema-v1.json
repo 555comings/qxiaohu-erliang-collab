@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "p3-2-skills-recall-packet-schema-v1.json",
+  "title": "P3.2 Skills Recall Packet",
+  "description": "Schema for the first bounded Skills Recall packet produced after P3.1 startup recovery has already selected the trustworthy active item.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trigger",
+    "active_item",
+    "recall_candidates",
+    "boundary"
+  ],
+  "properties": {
+    "trigger": {
+      "$ref": "#/$defs/trigger"
+    },
+    "active_item": {
+      "$ref": "#/$defs/activeItem"
+    },
+    "recall_candidates": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/recallCandidate"
+      }
+    },
+    "boundary": {
+      "$ref": "#/$defs/boundary"
+    }
+  },
+  "$defs": {
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "active-item-resume",
+        "artifact-path-match",
+        "domain-or-tool-hint",
+        "mandatory-protocol-gap",
+        "explicit-user-pull"
+      ],
+      "description": "First trigger that justified the Skills Recall pass."
+    },
+    "activeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "state",
+        "owner",
+        "artifact_hint"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Usually inherited from the recovered P3.1 item state."
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_hint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "expected_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence_commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "recallCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "source_kind",
+        "why_recalled",
+        "required_before_action",
+        "matched_from"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "active-item-evidence",
+            "workspace-note",
+            "collab-runbook",
+            "installed-skill"
+          ]
+        },
+        "why_recalled": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_before_action": {
+          "type": "boolean"
+        },
+        "matched_from": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Suggested values include title, expected_artifacts, user_request, evidence_path, evidence_command, artifact_hint, workflow_type, and mandatory_protocol_gap."
+        },
+        "source_tier": {
+          "type": "string",
+          "enum": [
+            "S0",
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ]
+        },
+        "priority_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Zero-based ranking inside the bounded recall packet."
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startup_recovery_status",
+        "does_not_update_promise_state",
+        "does_not_override_hottest_item",
+        "does_not_start_external_actions"
+      ],
+      "properties": {
+        "startup_recovery_status": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Should state that startup recovery already owns execution truth before Skills Recall runs."
+        },
+        "does_not_update_promise_state": {
+          "const": true
+        },
+        "does_not_override_hottest_item": {
+          "const": true
+        },
+        "does_not_start_external_actions": {
+          "const": true
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "trigger": "active-item-resume",
+      "active_item": {
+        "id": "p3-2-skills-recall-v1",
+        "title": "Define the first Skills Recall packet",
+        "state": "started",
+        "owner": "qxiaohu",
+        "artifact_hint": "plans/p3-2-skills-recall-v1.md",
+        "expected_artifacts": [
+          "plans/p3-2-skills-recall-packet-schema-v1.json"
+        ],
+        "evidence_paths": [
+          "plans/p3-2-skills-recall-v1.md"
+        ],
+        "evidence_commands": [
+          "node scripts/startup_recovery_check.mjs doctor qxiaohu notes/startup-recovery-state.json"
+        ]
+      },
+      "recall_candidates": [
+        {
+          "source_path": "AGENTS.md",
+          "source_kind": "workspace-note",
+          "why_recalled": "The active work depends on startup and collaboration rules already defined for this workspace.",
+          "required_before_action": true,
+          "matched_from": [
+            "artifact_hint",
+            "workflow_type"
+          ],
+          "source_tier": "S1",
+          "priority_index": 0
+        },
+        {
+          "source_path": "outputs/execution-checklist-v2.md",
+          "source_kind": "collab-runbook",
+          "why_recalled": "The active item ends in a handoff-ready artifact and needs the standard handoff package.",
+          "required_before_action": true,
+          "matched_from": [
+            "workflow_type",
+            "mandatory_protocol_gap"
+          ],
+          "source_tier": "S2",
+          "priority_index": 1
+        }
+      ],
+      "boundary": {
+        "startup_recovery_status": "already decided by P3.1",
+        "does_not_update_promise_state": true,
+        "does_not_override_hottest_item": true,
+        "does_not_start_external_actions": true
+      }
+    },
+    {
+      "trigger": "domain-or-tool-hint",
+      "active_item": {
+        "id": "p3-2-no-extra-recall-example",
+        "title": "Resume a task that does not need extra skill context",
+        "state": "started",
+        "owner": "qxiaohu",
+        "artifact_hint": null
+      },
+      "recall_candidates": [],
+      "boundary": {
+        "startup_recovery_status": "already decided by P3.1",
+        "does_not_update_promise_state": true,
+        "does_not_override_hottest_item": true,
+        "does_not_start_external_actions": true
+      }
+    }
+  ]
+}

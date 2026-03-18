@@ -1,0 +1,183 @@
+{
+  "version": "p3.1-v1",
+  "updatedAt": "2026-03-17T16:16:48.607Z",
+  "thresholds": {
+    "intentNoStartMinutes": 15,
+    "startedNoFollowupMinutes": 20,
+    "inProgressNoEvidenceMinutes": 45,
+    "silenceAfterEtaMinutes": 1
+  },
+  "items": [
+    {
+      "id": "p3-1-live-adoption-2026-03-17",
+      "title": "Adopt startup recovery live promise tracking for active work",
+      "owner": "qxiaohu",
+      "source_kind": "agent_commitment",
+      "provenance": {
+        "speaker": "qxiaohu",
+        "direction": "outbound",
+        "channel": "feishu",
+        "message_at": "2026-03-17T00:32:00.000Z",
+        "summary": "Continue pushing the system so startup recovery constraints become effective in live work."
+      },
+      "created_at": "2026-03-17T00:32:00.000Z",
+      "state": "done",
+      "state_changed_at": "2026-03-17T15:08:37.870Z",
+      "promise_status": "fulfilled",
+      "expected_update_by": "2026-03-17T15:38:31.529Z",
+      "expected_artifacts": [
+        "qxiaohu-erliang-collab/notes/startup-recovery-state.json",
+        "qxiaohu-erliang-collab/plans/p3-1-startup-recovery-confirmation-v1.md"
+      ],
+      "stall_status": "none",
+      "notes": "Bounded default-startup-path pass complete.",
+      "evidence": [
+        {
+          "type": "session_started",
+          "recorded_at": "2026-03-17T00:33:00.000Z",
+          "summary": "Started the first live adoption pass after wiring the startup-recovery heartbeat flow.",
+          "path": null,
+          "command": "node scripts/startup_recovery_check.mjs create ...",
+          "result": null
+        },
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T01:06:30.000Z",
+          "summary": "Resumed the live startup-recovery adoption pass after the stalled check and moved back into active execution.",
+          "path": null,
+          "command": null,
+          "result": "resume"
+        },
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T12:54:07.684Z",
+          "summary": "Added the resume operator path and live-work docs so stalled promises can be resumed with one shared-state command.",
+          "path": "plans/p3-1-startup-recovery-confirmation-v1.md",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "resume"
+        },
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T13:35:33.860Z",
+          "summary": "Added capture-live so new live promises no longer require a separate JSON payload before work is visible.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "resume"
+        },
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T15:08:31.529Z",
+          "summary": "Resumed execution to land doctor --apply-resume as the default startup recovery path.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "resume"
+        },
+        {
+          "type": "artifact_verified",
+          "recorded_at": "2026-03-17T15:08:37.870Z",
+          "summary": "Verified doctor --apply-resume so startup recovery can self-check and auto-refresh the hottest open item in one startup command.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "ok"
+        }
+      ],
+      "last_evidence_at": "2026-03-17T15:08:37.870Z"
+    },
+    {
+      "id": "p3-1-inline-resolve-verify-2026-03-17",
+      "title": "Land inline resolve verification flow",
+      "owner": "qxiaohu",
+      "source_kind": "agent_commitment",
+      "provenance": {
+        "speaker": "qxiaohu",
+        "direction": "outbound",
+        "channel": "feishu",
+        "message_at": "2026-03-17T13:59:59.834Z",
+        "summary": "Committed to land one-command close+verify for startup recovery."
+      },
+      "created_at": "2026-03-17T13:59:59.834Z",
+      "state": "done",
+      "state_changed_at": "2026-03-17T14:00:00.114Z",
+      "promise_status": "fulfilled",
+      "expected_update_by": "2026-03-17T14:29:59.834Z",
+      "expected_artifacts": [
+        "scripts/startup_recovery_check.mjs",
+        "scripts/startup_recovery_check_test.mjs",
+        "plans/p3-1-startup-recovery-confirmation-v1.md"
+      ],
+      "last_evidence_at": "2026-03-17T14:00:00.114Z",
+      "stall_status": "none",
+      "notes": "Bounded close/verify pass complete.",
+      "evidence": [
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T13:59:59.834Z",
+          "summary": "Started implementing the inline resolve verification flow.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "capture_live"
+        },
+        {
+          "type": "artifact_verified",
+          "recorded_at": "2026-03-17T14:00:00.114Z",
+          "summary": "Added one-command close+verify so startup recovery can close work without a JSON payload.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "ok"
+        }
+      ]
+    },
+    {
+      "id": "p3-1-final-e2e-2026-03-18",
+      "title": "Run final startup recovery E2E pass after resolve-hottest landing",
+      "owner": "qxiaohu",
+      "source_kind": "agent_commitment",
+      "provenance": {
+        "speaker": "qxiaohu",
+        "direction": "outbound",
+        "channel": "feishu",
+        "message_at": "2026-03-17T16:15:33.267Z",
+        "summary": "Committed to run one bounded final create/recover/close validation against the shared startup recovery state."
+      },
+      "created_at": "2026-03-17T16:15:33.267Z",
+      "state": "done",
+      "state_changed_at": "2026-03-17T16:16:37.063Z",
+      "promise_status": "fulfilled",
+      "expected_update_by": "2026-03-17T16:45:51.253Z",
+      "expected_artifacts": [
+        "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+        "scripts/startup_recovery_check.mjs",
+        "scripts/startup_recovery_check_test.mjs"
+      ],
+      "last_evidence_at": "2026-03-17T16:16:37.063Z",
+      "stall_status": "none",
+      "notes": "Final third-layer E2E validation pass complete.",
+      "evidence": [
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T16:15:33.267Z",
+          "summary": "Started the final bounded E2E validation pass using the shared state and current CLI flow.",
+          "path": "scripts/startup_recovery_check.mjs",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "capture_live"
+        },
+        {
+          "type": "manual_check",
+          "recorded_at": "2026-03-17T16:15:51.253Z",
+          "summary": "Resumed the final bounded startup recovery validation pass after the recovery check.",
+          "path": "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+          "command": "node scripts/startup_recovery_check.mjs doctor qxiaohu notes/startup-recovery-state.json",
+          "result": "resume"
+        },
+        {
+          "type": "artifact_verified",
+          "recorded_at": "2026-03-17T16:16:37.063Z",
+          "summary": "Verified the final bounded startup-recovery create/recover/close pass and closed it.",
+          "path": "notes/p3-1-startup-recovery-final-e2e-pass-2026-03-18.md",
+          "command": "node --test scripts/startup_recovery_check_test.mjs",
+          "result": "ok"
+        }
+      ]
+    }
+  ]
+}

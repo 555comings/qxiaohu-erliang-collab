@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "P3.1 Startup Recovery State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "updatedAt",
+    "thresholds",
+    "items"
+  ],
+  "properties": {
+    "version": {
+      "const": "p3.1-v1"
+    },
+    "updatedAt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Last state refresh time in ISO 8601."
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intentNoStartMinutes",
+        "startedNoFollowupMinutes",
+        "inProgressNoEvidenceMinutes",
+        "silenceAfterEtaMinutes"
+      ],
+      "properties": {
+        "intentNoStartMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "startedNoFollowupMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "inProgressNoEvidenceMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "silenceAfterEtaMinutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/promiseItem"
+      }
+    }
+  },
+  "$defs": {
+    "promiseItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "owner",
+        "source_kind",
+        "provenance",
+        "created_at",
+        "state",
+        "promise_status",
+        "stall_status",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "user_request",
+            "agent_commitment",
+            "review_rework",
+            "handoff",
+            "system_followup"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "intent",
+            "started",
+            "in_progress",
+            "done"
+          ]
+        },
+        "state_changed_at": {
+          "type": "string"
+        },
+        "promise_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "fulfilled",
+            "cancelled",
+            "superseded"
+          ]
+        },
+        "expected_update_by": {
+          "type": "string"
+        },
+        "expected_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "last_evidence_at": {
+          "type": "string"
+        },
+        "stall_status": {
+          "type": "string",
+          "enum": [
+            "none",
+            "watch",
+            "stalled"
+          ]
+        },
+        "stall_reason": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceItem"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "speaker",
+        "direction",
+        "channel",
+        "message_at"
+      ],
+      "properties": {
+        "speaker": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "inbound",
+            "outbound",
+            "relay",
+            "artifact"
+          ]
+        },
+        "channel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_id": {
+          "type": "string"
+        },
+        "message_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string"
+        }
+      }
+    },
+    "evidenceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "recorded_at",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "session_started",
+            "artifact_touched",
+            "command_started",
+            "command_result",
+            "artifact_verified",
+            "manual_check"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
