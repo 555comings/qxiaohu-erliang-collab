@@ -370,7 +370,7 @@ function buildLocalCandidate(activeItem, options) {
   ]);
   if (collabMatch.matched_from.length > 0 || String(activeItem.artifact_hint || '').includes('/')) {
     return {
-      source_path: 'memory/qxiaohu-collab-rules.json',
+      source_path: 'memory/shared-collab-rules.json',
       source_kind: 'workspace-note',
       why_recalled: 'The task lives in the shared collaboration flow, so the structured collaboration defaults and handoff rules are the smallest useful operating contract to recall.',
       required_before_action: true,
