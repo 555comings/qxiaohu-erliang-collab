@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-17T02:08:00+08:00",
+  "updatedAt": "2026-03-19T04:55:00+08:00",
   "updatedBy": "qxiaohu",
   "activeFocus": [
     {
@@ -10,23 +10,23 @@
       "owner": "qxiaohu"
     },
     {
-      "id": "shared-startup-chain",
-      "summary": "Make Erliang startup read the shared startup files first and report missing paths instead of guessing.",
+      "id": "shared-startup-hook",
+      "summary": "Use the executable shared startup recovery command before any fresh-session guessing or local note hunting.",
       "status": "active",
       "owner": "qxiaohu"
     }
   ],
   "openLoops": [
     {
-      "id": "shared-active-state-hook",
-      "summary": "Teach startup flow to read this shared active-state file as part of the default recovery chain.",
-      "nextAction": "Keep `memory/shared-active-state.json` in the startup read order and require a short recovery confirmation.",
-      "owner": "qxiaohu"
+      "id": "fresh-session-proof",
+      "summary": "Verify that Erliang actually runs the shared startup recovery command in a fresh session and can restate the recovered active focus/open loops.",
+      "nextAction": "Run `node scripts/wakeup-memory-scan.mjs recover --brief` first, then report the recovered slice, active focus, and top open loop.",
+      "owner": "erliang"
     },
     {
       "id": "skills-recall-layer",
       "summary": "Connect the existing P1 skills input material to the shared startup chain.",
-      "nextAction": "Define the smallest trigger-based recall layer after shared startup files stabilize.",
+      "nextAction": "Keep the P1 input file in the shared startup read order and only expand into trigger-based recall after fresh-session recovery is stable.",
       "owner": "qxiaohu"
     },
     {
@@ -37,9 +37,9 @@
     }
   ],
   "doNow": [
-    "Read shared startup files first.",
+    "Run `node scripts/wakeup-memory-scan.mjs recover --brief` first in a fresh shared-memory session.",
     "Use shared active focus and open loops to explain current status.",
-    "Do not assume Q xiaohu local workspace files are visible on Erliang machine."
+    "Report missing shared startup paths instead of inventing replacements."
   ],
   "doNotDo": [
     "Do not invent missing shared files.",

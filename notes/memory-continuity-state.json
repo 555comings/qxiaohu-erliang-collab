@@ -1,9 +1,9 @@
 {
   "version": 1,
   "project": "memory-continuity",
-  "revision": 2,
+  "revision": 3,
   "status": "in_progress",
-  "updatedAt": "2026-03-17T02:08:00+08:00",
+  "updatedAt": "2026-03-19T04:55:00+08:00",
   "lastUpdatedBy": "qxiaohu",
   "coordination": {
     "protocol": "shared-file-incremental",
@@ -42,37 +42,40 @@
     ],
     "plan": [
       "plans/shared-memory-source-of-truth-v1.md"
+    ],
+    "startupHook": [
+      "notes/shared-startup-hook-v1.md",
+      "scripts/wakeup-memory-scan.mjs"
     ]
   },
   "currentSlice": {
-    "name": "shared-active-state",
-    "status": "in_progress",
+    "name": "shared-startup-hook",
+    "status": "implemented",
     "ownerKey": "qxiaohu",
     "ownerLabel": "Q xiaohu"
   },
-  "nextOwnerKey": "qxiaohu",
-  "nextOwnerLabel": "Q xiaohu",
-  "supportOwnerKey": "erliang",
-  "supportOwnerLabel": "Erliang",
-  "ackRequired": false,
+  "nextOwnerKey": "erliang",
+  "nextOwnerLabel": "Erliang",
+  "supportOwnerKey": "qxiaohu",
+  "supportOwnerLabel": "Q xiaohu",
+  "ackRequired": true,
   "slaMinutes": 180,
   "escalateTo": "human",
   "lastSeenBy": {
     "qxiaohu": {
-      "revision": 2,
-      "at": "2026-03-17T02:08:00+08:00"
+      "revision": 3,
+      "at": "2026-03-19T04:55:00+08:00"
     },
     "erliang": null
   },
   "lastAckBy": {
     "qxiaohu": {
-      "revision": 2,
-      "at": "2026-03-17T02:08:00+08:00"
+      "revision": 3,
+      "at": "2026-03-19T04:55:00+08:00"
     },
     "erliang": null
   },
   "deferred": [
-    "shared-startup-hook",
     "startup-recovery-confirmation",
     "skills-recall-integration",
     "mcp-activation-integration"

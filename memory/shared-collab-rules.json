@@ -1,7 +1,7 @@
 {
   "version": 1,
   "owner": "shared",
-  "updatedAt": "2026-03-17T01:10:00+08:00",
+  "updatedAt": "2026-03-19T04:55:00+08:00",
   "purpose": "Cross-computer collaboration rules that both Q xiaohu and Erliang can read from the same repo.",
   "userPreferences": {
     "addressUserAs": {
@@ -21,9 +21,14 @@
   "startup": {
     "readFirst": [
       "memory/shared-startup-context.md",
+      "memory/shared-collab-rules.json",
+      "memory/shared-active-state.json",
       "notes/memory-continuity-handoff.md",
-      "notes/memory-continuity-state.json"
+      "notes/memory-continuity-state.json",
+      "notes/p1-skills-recall-input.md",
+      "notes/p2-mcp-activation-input.md"
     ],
+    "defaultRecoveryCommand": "node scripts/wakeup-memory-scan.mjs recover --brief",
     "ifMissing": "Report the missing path; do not invent a replacement file.",
     "doNotAssumeShared": [
       "MEMORY.md",

@@ -16,6 +16,16 @@ Read this before starting work that depends on shared memory or collaboration ru
 If one of these paths is missing, report the missing path and stop guessing.
 Do not create a substitute file unless explicitly asked.
 
+## Default Startup Recovery Command
+
+Run this first in a fresh shared-memory session:
+
+`node scripts/wakeup-memory-scan.mjs recover --brief`
+
+If you need the structured recovery payload, run:
+
+`node scripts/wakeup-memory-scan.mjs recover`
+
 ## Current Reality
 
 - Q xiaohu and Erliang run on different computers.
@@ -26,14 +36,14 @@ Do not create a substitute file unless explicitly asked.
 ## Active Priority
 
 The main engineering problem is memory continuity across fresh sessions.
-The immediate goal is to stop relying on Q xiaohu local-only files for cross-agent startup and to make both agents read the same shared startup rules.
+The immediate goal is to make both agents start from the same shared recovery command and the same shared startup files before acting.
 
 ## Current Slice
 
-- Slice: `shared-source-of-truth-bootstrap`
+- Slice: `shared-startup-hook`
 - Owner: `Q xiaohu`
 - Support: `Erliang`
-- Status: `in_progress`
+- Status: `implemented`
 
 ## Working Rules
 
@@ -44,8 +54,7 @@ The immediate goal is to stop relying on Q xiaohu local-only files for cross-age
 
 ## Next Engineering Order
 
-1. Bootstrap shared source-of-truth files.
-2. Wire startup reading to these shared files.
-3. Add shared active-state/current-focus handling.
-4. Require a short startup recovery confirmation against the shared active-state file.
-5. Layer in Skills recall and MCP activation on top of the shared startup chain.
+1. Verify that fresh Erliang sessions actually run the shared recovery command.
+2. Require a short startup recovery confirmation against the shared active-state file.
+3. Layer in Skills recall and MCP activation on top of the shared startup chain.
+4. Treat any missing shared startup path as a stop condition, not a cue to guess.

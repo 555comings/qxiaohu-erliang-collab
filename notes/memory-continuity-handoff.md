@@ -19,3 +19,9 @@
 - Change: Added the minimal shared active-state layer. The shared startup chain now includes `memory/shared-active-state.json`, which carries active focus, open loops, do-now items, and do-not-do items for cross-computer startup recovery.
 - Artifacts: `memory/shared-active-state.json`, `memory/shared-startup-context.md`, `notes/memory-continuity-state.json`
 - Next Owner: Q xiaohu
+
+## [handoff] 2026-03-19 04:55
+- Who: Q xiaohu
+- Change: Implemented the shared startup hook slice by turning `scripts/wakeup-memory-scan.mjs` into the executable shared recovery entry, updating the shared startup instructions/rules to point at it, and recording the new verification handoff for fresh Erliang sessions.
+- Artifacts: `scripts/wakeup-memory-scan.mjs`, `scripts/wakeup-memory-scan_test.mjs`, `notes/shared-startup-hook-v1.md`, `memory/shared-startup-context.md`, `memory/shared-collab-rules.json`, `memory/shared-active-state.json`, `notes/memory-continuity-state.json`
+- Next Owner: Erliang

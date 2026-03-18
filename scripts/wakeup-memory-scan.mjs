@@ -1,178 +1,226 @@
 #!/usr/bin/env node
 
-/**
- * 醒来记忆恢复脚本
- * 用途：模型刷新后，从多个记忆源恢复上下文
- * 位置：qxiaohu-erliang-collab/scripts/wakeup-memory-scan.mjs
- */
+import path from 'node:path';
+import process from 'node:process';
+import { access, readFile } from 'node:fs/promises';
 
-import { readFile, readdir, stat } from "node:fs/promises";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+const DEFAULT_READ_ORDER = [
+  'memory/shared-startup-context.md',
+  'memory/shared-collab-rules.json',
+  'memory/shared-active-state.json',
+  'notes/memory-continuity-handoff.md',
+  'notes/memory-continuity-state.json',
+  'notes/p1-skills-recall-input.md',
+  'notes/p2-mcp-activation-input.md'
+];
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const COLLAB_ROOT = join(__dirname, "..");
-const MEMORY_ROOT = join(COLLAB_ROOT, "..", "memory");
-const NOTES_ROOT = join(COLLAB_ROOT, "notes");
-
-// 记忆来源配置
-const SOURCES = {
-  selfAlert: {
-    path: join(MEMORY_ROOT, "self_alert_state.json"),
-    label: "Self Alert 状态"
-  },
-  collabState: {
-    path: join(NOTES_ROOT, "control-center-phase0-state.json"),
-    label: "协作任务状态"
-  },
-  dailyMemory: {
-    path: MEMORY_ROOT,
-    label: "Daily Memory",
-    scanDays: 3
-  },
-  tasks: {
-    path: join(COLLAB_ROOT, "tasks"),
-    label: "任务清单"
-  }
-};
-
-/**
- * 读取 JSON 文件
- */
-async function readJson(path) {
-  try {
-    const content = await readFile(path, "utf8");
-    return JSON.parse(content);
-  } catch {
-    return null;
-  }
+function usage() {
+  console.error([
+    'Usage:',
+    '  node scripts/wakeup-memory-scan.mjs recover [--repo-root <path>] [--brief]'
+  ].join('\n'));
 }
 
-/**
- * 扫描最近的 memory 文件
- */
-async function scanRecentMemory(memoryPath, days = 3) {
-  const files = await readdir(memoryPath);
-  const now = new Date();
-  const recentFiles = [];
-
-  for (const file of files) {
-    if (!file.match(/^\d{4}-\d{2}-\d{2}\.md$/)) continue;
-    
-    const filePath = join(memoryPath, file);
-    const fileStat = await stat(filePath);
-    const fileDate = new Date(fileStat.mtime);
-    
-    const diffDays = Math.floor((now - fileDate) / (1000 * 60 * 60 * 24));
-    if (diffDays <= days) {
-      recentFiles.push({ file, path: filePath, mtime: fileStat.mtime });
-    }
-  }
-
-  // 按时间排序，最新的在前
-  recentFiles.sort((a, b) => b.mtime - a.mtime);
-  
-  // 读取最新文件的内容摘要
-  const summaries = [];
-  for (const f of recentFiles.slice(0, days)) {
-    const content = await readFile(f.path, "utf8");
-    // 提取 End State 或最后几行
-    const lines = content.split("\n");
-    const endStateLine = lines.find(l => l.includes("End State") || l.includes("State:"));
-    const nextLine = lines.find(l => l.includes("Next:"));
-    summaries.push({
-      file: f.file,
-      endState: endStateLine?.trim(),
-      nextAction: nextLine?.trim()
-    });
-  }
-  
-  return summaries;
-}
-
-/**
- * 从 daily memory 提取当前任务
- */
-function extractCurrentTask(summaries) {
-  for (const s of summaries) {
-    if (s.nextAction && s.nextAction.includes("Next:")) {
-      return s.nextAction.replace("Next:", "").trim();
-    }
-    if (s.endState && s.endState.includes("State:")) {
-      return s.endState.replace("State:", "").trim();
-    }
-  }
-  return null;
-}
-
-/**
- * 主函数
- */
-async function main() {
-  console.log("=== 二两醒来记忆扫描 ===\n");
-  
-  const result = {
-    timestamp: new Date().toISOString(),
-    sources: {},
-    summary: []
+function parseArgs(argv) {
+  const options = {
+    command: 'recover',
+    repoRoot: process.cwd(),
+    brief: false
   };
 
-  // 1. 读取 self_alert_state
-  const selfAlert = await readJson(SOURCES.selfAlert.path);
-  result.sources.selfAlert = selfAlert;
-  if (selfAlert?.records?.length > 0) {
-    const last = selfAlert.records[0];
-    result.summary.push(`最后记录：${last.signal_type} (${last.topic_scope})`);
+  let index = 0;
+  if (argv[0] && !argv[0].startsWith('--')) {
+    options.command = argv[0];
+    index = 1;
   }
 
-  // 2. 读取协作状态
-  const collabState = await readJson(SOURCES.collabState.path);
-  result.sources.collabState = collabState;
-  if (collabState) {
-    const { revision, nextOwnerKey, currentSlice, status } = collabState;
-    result.summary.push(`当前任务：${currentSlice?.name || "无"} (revision=${revision}, status=${status})`);
-    result.summary.push(`下一步负责人：${nextOwnerKey}`);
-  }
-
-  // 3. 扫描 daily memory
-  const memorySummaries = await scanRecentMemory(SOURCES.dailyMemory.path, SOURCES.dailyMemory.scanDays);
-  result.sources.dailyMemory = memorySummaries;
-  const currentTask = extractCurrentTask(memorySummaries);
-  if (currentTask) {
-    result.summary.push(`当前任务：${currentTask}`);
-  }
-
-  // 4. 扫描 tasks
-  try {
-    const taskFiles = await readdir(SOURCES.tasks.path);
-    const pendingTasks = taskFiles.filter(f => f.startsWith("task-") && f.endsWith(".md"));
-    result.sources.tasks = { count: pendingTasks.length, files: pendingTasks };
-    if (pendingTasks.length > 0) {
-      result.summary.push(`待处理任务：${pendingTasks.length}个`);
+  while (index < argv.length) {
+    const token = argv[index];
+    if (token === '--brief') {
+      options.brief = true;
+      index += 1;
+      continue;
     }
+
+    if (token === '--repo-root') {
+      const value = argv[index + 1];
+      if (!value || value.startsWith('--')) {
+        throw new Error('Missing value for --repo-root');
+      }
+      options.repoRoot = path.resolve(value);
+      index += 2;
+      continue;
+    }
+
+    throw new Error(`Unknown option: ${token}`);
+  }
+
+  return options;
+}
+
+function stripBom(value) {
+  return String(value || '').replace(/^\uFEFF/, '');
+}
+
+async function pathExists(filePath) {
+  try {
+    await access(filePath);
+    return true;
   } catch {
-    result.sources.tasks = { count: 0 };
+    return false;
+  }
+}
+
+async function loadText(filePath) {
+  return stripBom(await readFile(filePath, 'utf8'));
+}
+
+async function loadJson(filePath) {
+  return JSON.parse(await loadText(filePath));
+}
+
+function normalizePath(value) {
+  return String(value || '').replace(/\\/g, '/');
+}
+
+function firstMeaningfulLine(text) {
+  return String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => line && !line.startsWith('#')) || null;
+}
+
+function extractLastHandoffChange(text) {
+  const matches = [...String(text || '').matchAll(/^- Change:\s*(.+)$/gm)];
+  return matches.length > 0 ? matches[matches.length - 1][1].trim() : null;
+}
+
+function summarizeActiveFocus(items) {
+  return Array.isArray(items)
+    ? items.map((item) => item.summary || item.id || 'unknown-focus')
+    : [];
+}
+
+function summarizeOpenLoops(items) {
+  return Array.isArray(items)
+    ? items.map((item) => ({
+        id: item.id || null,
+        summary: item.summary || null,
+        nextAction: item.nextAction || null,
+        owner: item.owner || null
+      }))
+    : [];
+}
+
+function buildRecoveryConfirmation(summary) {
+  const focus = summary.activeFocus[0] || 'no-active-focus';
+  const loop = summary.openLoops[0]?.nextAction || summary.openLoops[0]?.summary || 'no-open-loop';
+  return [
+    `Recovered current slice: ${summary.currentSlice || 'unknown-slice'}.`,
+    `Primary focus: ${focus}`,
+    `Next action: ${loop}`,
+    `Default startup command: ${summary.defaultRecoveryCommand}`
+  ].join(' ');
+}
+
+function buildBriefOutput(summary) {
+  return [
+    'RECOVERED',
+    summary.currentSlice || 'unknown-slice',
+    `focus=${summary.activeFocus.length}`,
+    `loops=${summary.openLoops.length}`,
+    `next=${summary.nextOwner || 'unknown'}`,
+    `do=${summary.doNow[0] || 'none'}`
+  ].join(' | ');
+}
+
+async function loadSharedStartup(repoRoot) {
+  const loaded = {};
+  const missingPaths = [];
+
+  for (const relativePath of DEFAULT_READ_ORDER) {
+    const fullPath = path.join(repoRoot, ...relativePath.split('/'));
+    if (!(await pathExists(fullPath))) {
+      missingPaths.push(relativePath);
+      continue;
+    }
+
+    loaded[relativePath] = relativePath.endsWith('.json')
+      ? await loadJson(fullPath)
+      : await loadText(fullPath);
   }
 
-  // 输出摘要
-  console.log("【醒来摘要】");
-  console.log(`时间：${result.timestamp}\n`);
-  
-  for (const line of result.summary) {
-    console.log(`- ${line}`);
+  return { loaded, missingPaths };
+}
+
+async function commandRecover(options) {
+  const { loaded, missingPaths } = await loadSharedStartup(options.repoRoot);
+  const result = {
+    ok: missingPaths.length === 0,
+    mode: 'shared-startup-recovery',
+    repoRoot: normalizePath(options.repoRoot),
+    readOrder: DEFAULT_READ_ORDER,
+    missingPaths
+  };
+
+  if (missingPaths.length > 0) {
+    result.nextAction = 'Report the missing shared startup path and stop guessing.';
+    return result;
   }
-  
-  console.log("\n【详细来源】");
-  console.log(`- Self Alert: ${selfAlert ? "已读取" : "无"}`);
-  console.log(`- 协作状态: ${collabState ? `revision=${collabState.revision}` : "无"}`);
-  console.log(`- Daily Memory: ${memorySummaries.length}个文件`);
-  console.log(`- 任务清单: ${result.sources.tasks?.count || 0}个`);
 
-  // 输出 JSON 格式（供程序使用）
-  console.log("\n=== JSON Output ===");
-  console.log(JSON.stringify(result, null, 2));
+  const collabRules = loaded['memory/shared-collab-rules.json'];
+  const activeState = loaded['memory/shared-active-state.json'];
+  const continuityState = loaded['notes/memory-continuity-state.json'];
+  const handoffText = loaded['notes/memory-continuity-handoff.md'];
 
+  const summary = {
+    currentSlice: continuityState.currentSlice?.name || null,
+    currentSliceStatus: continuityState.currentSlice?.status || null,
+    nextOwner: continuityState.nextOwnerKey || null,
+    supportOwner: continuityState.supportOwnerKey || null,
+    activeFocus: summarizeActiveFocus(activeState.activeFocus),
+    openLoops: summarizeOpenLoops(activeState.openLoops),
+    doNow: Array.isArray(activeState.doNow) ? activeState.doNow : [],
+    doNotDo: Array.isArray(activeState.doNotDo) ? activeState.doNotDo : [],
+    startupReadFirst: Array.isArray(collabRules.startup?.readFirst) ? collabRules.startup.readFirst : [],
+    defaultRecoveryCommand: collabRules.startup?.defaultRecoveryCommand || 'node scripts/wakeup-memory-scan.mjs recover --brief',
+    latestHandoffChange: extractLastHandoffChange(handoffText),
+    skillsRecallInput: firstMeaningfulLine(loaded['notes/p1-skills-recall-input.md']),
+    mcpActivationInput: firstMeaningfulLine(loaded['notes/p2-mcp-activation-input.md'])
+  };
+
+  result.summary = summary;
+  result.recoveryConfirmation = buildRecoveryConfirmation(summary);
   return result;
 }
 
-main().catch(console.error);
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  if (options.command === '--help' || options.command === '-h') {
+    usage();
+    return;
+  }
+
+  if (options.command !== 'recover') {
+    throw new Error(`Unsupported command: ${options.command}`);
+  }
+
+  const result = await commandRecover(options);
+  if (options.brief) {
+    if (!result.ok) {
+      process.stdout.write(`STOP | missing=${result.missingPaths.join(', ')}\n`);
+    } else {
+      process.stdout.write(`${buildBriefOutput(result.summary)}\n`);
+    }
+    process.exitCode = result.ok ? 0 : 2;
+    return;
+  }
+
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  process.exitCode = result.ok ? 0 : 2;
+}
+
+main().catch((error) => {
+  console.error(error.message || String(error));
+  process.exit(1);
+});
